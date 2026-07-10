@@ -89,6 +89,31 @@ body {
   50% { filter: brightness(1.35); }
 }
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float-glow {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+
+.vq-shimmer {
+  background-size: 220% 220% !important;
+  animation: shimmer-pan 4s ease-in-out infinite;
+}
+
+.vq-spin-ring {
+  animation: spin-slow linear infinite;
+}
+
 .typing-dot {
   animation: typingBounce 1.2s infinite ease-in-out;
 }

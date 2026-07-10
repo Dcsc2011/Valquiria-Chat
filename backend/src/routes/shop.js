@@ -93,6 +93,12 @@ router.post('/equip', authRequired, async (req, res) => {
   if (item.ownerOnly && !user.isOwner) {
     return res.status(403).json({ error: 'Este item é exclusivo do fundador da instância.' });
   }
+  if (item.adminOnly && !user.isAdmin) {
+    return res.status(403).json({ error: 'Este item é exclusivo de administradores.' });
+  }
+  if (item.founderOnly && !(user.badges || []).includes('founder')) {
+    return res.status(403).json({ error: 'Este item é exclusivo de quem tem o selo de Fundador.' });
+  }
   if (!user.inventory.includes(itemId)) {
     return res.status(403).json({ error: 'Não possuis este item.' });
   }

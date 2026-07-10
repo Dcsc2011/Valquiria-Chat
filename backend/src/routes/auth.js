@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const { getUsers, saveUsers, getSessions, saveSessions, getConfig } = require('../services/store');
 const { sanitizeUsername, sanitizeText, isNonEmptyString } = require('../utils/sanitize');
 const { authRequired } = require('../middleware/auth');
+const { grantExclusiveCosmetics } = require('../services/exclusiveCosmetics');
 
 const router = express.Router();
 
@@ -80,6 +81,7 @@ router.post('/register', async (req, res) => {
     };
 
     users.push(newUser);
+    grantExclusiveCosmetics(newUser);
     await saveUsers(users);
 
     const token = signToken(newUser);

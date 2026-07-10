@@ -12,6 +12,9 @@ export interface CosmeticPreview {
   color?: string;
   emojis?: string[];
   cursorColor?: string;
+  ringGradient?: string;
+  spinDuration?: string;
+  shimmer?: boolean;
 }
 
 export interface CosmeticItem {

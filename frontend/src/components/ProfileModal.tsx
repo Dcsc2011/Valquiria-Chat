@@ -28,6 +28,7 @@ const THEME_OPTIONS: { id: ThemeName; label: string }[] = [
 export default function ProfileModal({ onClose }: ProfileModalProps) {
   const { user, setUser } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { getEquipped } = useCatalog();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
@@ -110,7 +111,7 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
         <div className="px-6 pb-6">
           <div className="-mt-10 mb-3 flex items-end gap-3">
             <div className="relative">
-              <Avatar src={avatar} name={name} size={84} />
+              <Avatar src={avatar} name={name} size={84} frame={getEquipped(user).frame} aura={getEquipped(user).aura} />
               <label className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-accent p-1.5">
                 <Camera className="h-4 w-4 text-panel" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />

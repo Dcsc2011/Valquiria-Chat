@@ -41,7 +41,7 @@ export function CosmeticSwatch({ item, size = 64 }: CosmeticSwatchProps) {
     return (
       <div
         className="flex items-center justify-center rounded-lg bg-panel text-2xl"
-        style={{ width: size, height: size }}
+        style={{ width: size, height: size, color: p.color }}
       >
         {p.emoji || '🏅'}
       </div>
@@ -73,37 +73,40 @@ export function CosmeticSwatch({ item, size = 64 }: CosmeticSwatchProps) {
   }
 
   if (item.type === 'frame' || item.type === 'aura') {
+    const ringPadding = p.ringGradient ? Math.max(5, size * 0.14) : 0;
+    const outer = size + ringPadding * 2;
     return (
-      <div
-        className="rounded-full bg-panelHeader"
-        style={{
-          width: size,
-          height: size,
-          border: p.border,
-          boxShadow: p.boxShadow,
-          animation: p.animation,
-        }}
-      />
+      <div className="relative flex items-center justify-center" style={{ width: outer, height: outer }}>
+        {p.ringGradient && (
+          <div
+            className="absolute inset-0 rounded-full vq-spin-ring"
+            style={{
+              background: p.ringGradient,
+              animationDuration: p.spinDuration || '3s',
+              WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px))',
+              mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px))',
+            }}
+          />
+        )}
+        <div
+          className="rounded-full bg-panelHeader"
+          style={{
+            width: size,
+            height: size,
+            border: p.border,
+            boxShadow: p.boxShadow,
+            animation: p.animation,
+          }}
+        />
+      </div>
     );
   }
 
   // banner / background
   return (
     <div
-      className="rounded-lg"
+      className={`rounded-lg ${p.shimmer ? 'vq-shimmer' : ''}`}
       style={{ width: size, height: size * 0.6, background: p.background }}
     />
   );
 }
-
-export function applyFrameStyle(preview?: CosmeticPreviewLike) {
-  if (!preview) return {};
-  return { border: preview.border, boxShadow: preview.boxShadow, animation: preview.animation };
-}
-
-export function applyAuraStyle(preview?: CosmeticPreviewLike) {
-  if (!preview) return {};
-  return { boxShadow: preview.boxShadow, animation: preview.animation };
-}
-
-type CosmeticPreviewLike = { border?: string; boxShadow?: string; animation?: string };

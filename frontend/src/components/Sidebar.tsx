@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreVertical, LogOut, UserCog, ShieldCheck, Users, MessageSquarePlus, Store } from 'lucide-react';
+import { MoreVertical, LogOut, UserCog, ShieldCheck, Users, MessageSquarePlus, Store, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
 import SearchBar from './SearchBar';
@@ -97,6 +97,15 @@ export default function Sidebar({
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-textPrimary hover:bg-panelHeader"
                   >
                     <ShieldCheck className="h-4 w-4" /> Painel admin
+                  </Link>
+                )}
+                {user.isOwner && (
+                  <Link
+                    to="/owner"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-yellow-400 hover:bg-panelHeader"
+                  >
+                    <Crown className="h-4 w-4" /> Painel do Dono
                   </Link>
                 )}
                 <button

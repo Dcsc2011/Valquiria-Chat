@@ -23,6 +23,7 @@ const {
   getAuditLog,
 } = require('../services/store');
 const { logAdminAction } = require('../services/auditLog');
+const { grantExclusiveCosmetics } = require('../services/exclusiveCosmetics');
 const { CATEGORIES, RARITIES } = require('../data/cosmeticsCatalog');
 const { DB_DIR } = require('../services/jsonDb');
 const { UPLOADS_DIR } = require('../middleware/upload');
@@ -184,6 +185,7 @@ router.post('/users/:id/toggle-admin', adminRequired, async (req, res) => {
   if (!user) return res.status(404).json({ error: 'Utilizador não encontrado.' });
 
   user.isAdmin = !user.isAdmin;
+  grantExclusiveCosmetics(user);
   await saveUsers(users);
   res.json({ user: toPublicUser(user) });
 });
@@ -194,6 +196,7 @@ router.put('/users/:id/badges', adminRequired, async (req, res) => {
   if (!user) return res.status(404).json({ error: 'Utilizador não encontrado.' });
 
   user.badges = sanitizeBadges(req.body?.badges);
+  grantExclusiveCosmetics(user);
   await saveUsers(users);
   res.json({ user: toPublicUser(user) });
 });
@@ -226,6 +229,7 @@ router.post('/users/:id/owner', adminRequired, async (req, res) => {
   if (!user) return res.status(404).json({ error: 'Utilizador não encontrado.' });
 
   user.isOwner = !user.isOwner;
+  grantExclusiveCosmetics(user);
   await saveUsers(users);
   await logAdminAction('toggle_owner', { userId: user.id, isOwner: user.isOwner });
   res.json({ user: toPublicUser(user) });

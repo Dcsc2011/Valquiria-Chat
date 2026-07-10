@@ -44,4 +44,16 @@ function adminRequired(req, res, next) {
   }
 }
 
-module.exports = { authRequired, adminRequired };
+// Restringe rotas ao utilizador marcado como "Dono" (isOwner) da instância.
+// Ao contrário do adminRequired, usa o JWT normal do utilizador (authRequired),
+// não as credenciais de admin do .env — é um painel dentro da própria conta.
+function ownerRequired(req, res, next) {
+  authRequired(req, res, () => {
+    if (!req.user.isOwner) {
+      return res.status(403).json({ error: 'Acesso restrito ao dono da instância.' });
+    }
+    next();
+  });
+}
+
+module.exports = { authRequired, adminRequired, ownerRequired };

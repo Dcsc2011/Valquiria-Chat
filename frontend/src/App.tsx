@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import ChatPage from './pages/ChatPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
+import OwnerPanel from './pages/OwnerPanel';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -27,6 +28,14 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<AdminPanel />} />
+      <Route
+        path="/owner"
+        element={
+          <PrivateRoute>
+            <OwnerPanel />
+          </PrivateRoute>
+        }
+      />
       <Route
         path="/"
         element={
