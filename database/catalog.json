@@ -1,0 +1,530 @@
+{
+  "categories": [
+    "banner",
+    "frame",
+    "aura",
+    "badge",
+    "background",
+    "emoji",
+    "cursor"
+  ],
+  "rarities": [
+    "common",
+    "rare",
+    "epic",
+    "legendary",
+    "mythic"
+  ],
+  "bundles": [
+    {
+      "id": "royal",
+      "name": "Royal",
+      "theme": "Ouro e roxo imperial",
+      "itemIds": [
+        "banner_royal",
+        "frame_royal",
+        "aura_royal"
+      ]
+    },
+    {
+      "id": "ragnarok",
+      "name": "Ragnarok",
+      "theme": "Fogo e cinzas do fim dos tempos",
+      "itemIds": [
+        "banner_ragnarok",
+        "frame_ragnarok",
+        "aura_ragnarok"
+      ]
+    },
+    {
+      "id": "valhalla",
+      "name": "Valhalla",
+      "theme": "Dourado celestial dos guerreiros",
+      "itemIds": [
+        "banner_valhalla",
+        "frame_valhalla",
+        "aura_valhalla"
+      ]
+    },
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "theme": "Luzes do norte, verde e azul",
+      "itemIds": [
+        "banner_aurora",
+        "frame_aurora",
+        "aura_aurora"
+      ]
+    },
+    {
+      "id": "galaxy",
+      "name": "Galaxy",
+      "theme": "Nebulosas roxas e estrelas",
+      "itemIds": [
+        "banner_galaxy",
+        "frame_galaxy",
+        "aura_galaxy"
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow",
+      "theme": "Preto profundo e prata fosca",
+      "itemIds": [
+        "banner_shadow",
+        "frame_shadow",
+        "aura_shadow"
+      ]
+    },
+    {
+      "id": "dragon",
+      "name": "Dragon",
+      "theme": "Escamas verdes e vermelhas",
+      "itemIds": [
+        "banner_dragon",
+        "frame_dragon",
+        "aura_dragon"
+      ]
+    },
+    {
+      "id": "cyber",
+      "name": "Cyber",
+      "theme": "Neon ciano e magenta",
+      "itemIds": [
+        "banner_cyber",
+        "frame_cyber",
+        "aura_cyber"
+      ]
+    },
+    {
+      "id": "celestial",
+      "name": "Celestial",
+      "theme": "Azul-noite com constelações",
+      "itemIds": [
+        "banner_celestial",
+        "frame_celestial",
+        "aura_celestial"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "banner_royal",
+      "type": "banner",
+      "bundleId": "royal",
+      "name": "Bandeira Real",
+      "rarity": "legendary",
+      "price": 800,
+      "preview": {
+        "background": "linear-gradient(135deg, #1a0b2e 0%, #5b21b6 50%, #d4af37 100%)"
+      }
+    },
+    {
+      "id": "frame_royal",
+      "type": "frame",
+      "bundleId": "royal",
+      "name": "Moldura Real",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "border": "3px solid #d4af37",
+        "boxShadow": "0 0 12px #d4af3799"
+      }
+    },
+    {
+      "id": "aura_royal",
+      "type": "aura",
+      "bundleId": "royal",
+      "name": "Auréola Real",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "boxShadow": "0 0 24px 6px #7C3AED99",
+        "animation": "pulse 2.5s infinite"
+      }
+    },
+    {
+      "id": "banner_ragnarok",
+      "type": "banner",
+      "bundleId": "ragnarok",
+      "name": "Bandeira Ragnarok",
+      "rarity": "legendary",
+      "price": 800,
+      "preview": {
+        "background": "linear-gradient(135deg, #1a0000 0%, #7f1d1d 50%, #f97316 100%)"
+      }
+    },
+    {
+      "id": "frame_ragnarok",
+      "type": "frame",
+      "bundleId": "ragnarok",
+      "name": "Moldura Ragnarok",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "border": "3px solid #f97316",
+        "boxShadow": "0 0 12px #f9731699"
+      }
+    },
+    {
+      "id": "aura_ragnarok",
+      "type": "aura",
+      "bundleId": "ragnarok",
+      "name": "Auréola de Cinzas",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "boxShadow": "0 0 24px 6px #dc262699",
+        "animation": "pulse 2s infinite"
+      }
+    },
+    {
+      "id": "banner_valhalla",
+      "type": "banner",
+      "bundleId": "valhalla",
+      "name": "Bandeira de Valhalla",
+      "rarity": "mythic",
+      "price": 1200,
+      "preview": {
+        "background": "linear-gradient(135deg, #1a1400 0%, #92720a 40%, #ffd76e 100%)"
+      }
+    },
+    {
+      "id": "frame_valhalla",
+      "type": "frame",
+      "bundleId": "valhalla",
+      "name": "Moldura Dourada",
+      "rarity": "legendary",
+      "price": 700,
+      "preview": {
+        "border": "3px solid #ffd76e",
+        "boxShadow": "0 0 16px #ffd76ecc"
+      }
+    },
+    {
+      "id": "aura_valhalla",
+      "type": "aura",
+      "bundleId": "valhalla",
+      "name": "Auréola Celestial",
+      "rarity": "legendary",
+      "price": 700,
+      "preview": {
+        "boxShadow": "0 0 28px 8px #ffd76e99",
+        "animation": "pulse 3s infinite"
+      }
+    },
+    {
+      "id": "banner_aurora",
+      "type": "banner",
+      "bundleId": "aurora",
+      "name": "Bandeira Aurora",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "background": "linear-gradient(135deg, #04121a 0%, #0d9488 45%, #34d399 100%)"
+      }
+    },
+    {
+      "id": "frame_aurora",
+      "type": "frame",
+      "bundleId": "aurora",
+      "name": "Moldura Aurora",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "border": "3px solid #34d399",
+        "boxShadow": "0 0 10px #34d39999"
+      }
+    },
+    {
+      "id": "aura_aurora",
+      "type": "aura",
+      "bundleId": "aurora",
+      "name": "Auréola Boreal",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "boxShadow": "0 0 20px 5px #2dd4bf99",
+        "animation": "pulse 2.2s infinite"
+      }
+    },
+    {
+      "id": "banner_galaxy",
+      "type": "banner",
+      "bundleId": "galaxy",
+      "name": "Bandeira Galáctica",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "background": "radial-gradient(circle at 30% 30%, #6d28d9, #0b0f19 70%)"
+      }
+    },
+    {
+      "id": "frame_galaxy",
+      "type": "frame",
+      "bundleId": "galaxy",
+      "name": "Moldura Nebulosa",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "border": "3px solid #8b5cf6",
+        "boxShadow": "0 0 10px #8b5cf699"
+      }
+    },
+    {
+      "id": "aura_galaxy",
+      "type": "aura",
+      "bundleId": "galaxy",
+      "name": "Auréola Cósmica",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "boxShadow": "0 0 20px 5px #8b5cf699",
+        "animation": "pulse 2.8s infinite"
+      }
+    },
+    {
+      "id": "banner_shadow",
+      "type": "banner",
+      "bundleId": "shadow",
+      "name": "Bandeira das Sombras",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "background": "linear-gradient(135deg, #000000 0%, #1c1c1c 50%, #4b5563 100%)"
+      }
+    },
+    {
+      "id": "frame_shadow",
+      "type": "frame",
+      "bundleId": "shadow",
+      "name": "Moldura Sombria",
+      "rarity": "common",
+      "price": 150,
+      "preview": {
+        "border": "3px solid #6b7280",
+        "boxShadow": "0 0 8px #6b728099"
+      }
+    },
+    {
+      "id": "aura_shadow",
+      "type": "aura",
+      "bundleId": "shadow",
+      "name": "Auréola Sombria",
+      "rarity": "common",
+      "price": 150,
+      "preview": {
+        "boxShadow": "0 0 16px 4px #37415199",
+        "animation": "pulse 3.5s infinite"
+      }
+    },
+    {
+      "id": "banner_dragon",
+      "type": "banner",
+      "bundleId": "dragon",
+      "name": "Bandeira do Dragão",
+      "rarity": "legendary",
+      "price": 800,
+      "preview": {
+        "background": "linear-gradient(135deg, #052e16 0%, #166534 45%, #b91c1c 100%)"
+      }
+    },
+    {
+      "id": "frame_dragon",
+      "type": "frame",
+      "bundleId": "dragon",
+      "name": "Moldura Escamada",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "border": "3px solid #16a34a",
+        "boxShadow": "0 0 12px #16a34a99"
+      }
+    },
+    {
+      "id": "aura_dragon",
+      "type": "aura",
+      "bundleId": "dragon",
+      "name": "Auréola Flamejante",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "boxShadow": "0 0 24px 6px #b91c1c99",
+        "animation": "pulse 1.8s infinite"
+      }
+    },
+    {
+      "id": "banner_cyber",
+      "type": "banner",
+      "bundleId": "cyber",
+      "name": "Bandeira Cyber",
+      "rarity": "epic",
+      "price": 500,
+      "preview": {
+        "background": "linear-gradient(135deg, #0b0f19 0%, #0891b2 50%, #d946ef 100%)"
+      }
+    },
+    {
+      "id": "frame_cyber",
+      "type": "frame",
+      "bundleId": "cyber",
+      "name": "Moldura Neon",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "border": "3px solid #22d3ee",
+        "boxShadow": "0 0 12px #22d3eecc"
+      }
+    },
+    {
+      "id": "aura_cyber",
+      "type": "aura",
+      "bundleId": "cyber",
+      "name": "Auréola Neon",
+      "rarity": "rare",
+      "price": 300,
+      "preview": {
+        "boxShadow": "0 0 20px 5px #d946ef99",
+        "animation": "pulse 1.5s infinite"
+      }
+    },
+    {
+      "id": "banner_celestial",
+      "type": "banner",
+      "bundleId": "celestial",
+      "name": "Bandeira Celestial",
+      "rarity": "mythic",
+      "price": 1200,
+      "preview": {
+        "background": "linear-gradient(135deg, #020617 0%, #1e3a8a 45%, #93c5fd 100%)"
+      }
+    },
+    {
+      "id": "frame_celestial",
+      "type": "frame",
+      "bundleId": "celestial",
+      "name": "Moldura Estelar",
+      "rarity": "legendary",
+      "price": 700,
+      "preview": {
+        "border": "3px solid #93c5fd",
+        "boxShadow": "0 0 16px #93c5fdcc"
+      }
+    },
+    {
+      "id": "aura_celestial",
+      "type": "aura",
+      "bundleId": "celestial",
+      "name": "Auréola das Constelações",
+      "rarity": "legendary",
+      "price": 700,
+      "preview": {
+        "boxShadow": "0 0 28px 8px #60a5fa99",
+        "animation": "pulse 3.2s infinite"
+      }
+    },
+    {
+      "id": "badge_pioneer",
+      "type": "badge",
+      "bundleId": null,
+      "name": "Pioneiro",
+      "rarity": "mythic",
+      "price": null,
+      "codeOnly": true,
+      "preview": {
+        "emoji": "🛡️",
+        "color": "#d4af37"
+      }
+    },
+    {
+      "id": "badge_valquiria",
+      "type": "badge",
+      "bundleId": null,
+      "name": "Insígnia da Valquíria",
+      "rarity": "legendary",
+      "price": 1000,
+      "preview": {
+        "emoji": "🪽",
+        "color": "#7C3AED"
+      }
+    },
+    {
+      "id": "background_runes",
+      "type": "background",
+      "bundleId": null,
+      "name": "Fundo de Runas",
+      "rarity": "rare",
+      "price": 250,
+      "preview": {
+        "background": "repeating-linear-gradient(45deg, #0b0f19 0 12px, #131a2b 12px 24px)"
+      }
+    },
+    {
+      "id": "background_frost",
+      "type": "background",
+      "bundleId": null,
+      "name": "Fundo Gélido",
+      "rarity": "rare",
+      "price": 250,
+      "preview": {
+        "background": "linear-gradient(180deg, #0b1220 0%, #1e293b 100%)"
+      }
+    },
+    {
+      "id": "emoji_pack_norse",
+      "type": "emoji",
+      "bundleId": null,
+      "name": "Pack de Emoji Nórdico",
+      "rarity": "epic",
+      "price": 400,
+      "preview": {
+        "emojis": [
+          "⚔️",
+          "🛡️",
+          "🪓",
+          "🐺",
+          "🌌",
+          "⚡"
+        ]
+      }
+    },
+    {
+      "id": "cursor_gold",
+      "type": "cursor",
+      "bundleId": null,
+      "name": "Cursor Dourado",
+      "rarity": "epic",
+      "price": 400,
+      "preview": {
+        "cursorColor": "#d4af37"
+      }
+    },
+    {
+      "id": "frame_owner",
+      "type": "frame",
+      "bundleId": null,
+      "name": "Moldura do Fundador",
+      "rarity": "mythic",
+      "price": null,
+      "ownerOnly": true,
+      "preview": {
+        "border": "3px solid #ffffff",
+        "boxShadow": "0 0 30px 10px #ffffffcc",
+        "animation": "pulse 1.2s infinite"
+      }
+    },
+    {
+      "id": "aura_owner",
+      "type": "aura",
+      "bundleId": null,
+      "name": "Auréola do Fundador",
+      "rarity": "mythic",
+      "price": null,
+      "ownerOnly": true,
+      "preview": {
+        "boxShadow": "0 0 34px 12px #ffffffcc",
+        "animation": "pulse 1s infinite"
+      }
+    }
+  ]
+}

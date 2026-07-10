@@ -1,0 +1,15 @@
+[
+  {
+    "code": "DAMOCLES",
+    "itemIds": [],
+    "bundleId": "celestial",
+    "currency": 50000,
+    "maxUses": null,
+    "expiresAt": "2026-10-17",
+    "revoked": false,
+    "usedBy": [
+      "8795d3a8-38f3-4f47-b6eb-b24bab85a6eb"
+    ],
+    "createdAt": "2026-07-10T07:59:03.447Z"
+  }
+]

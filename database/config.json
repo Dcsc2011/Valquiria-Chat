@@ -1,0 +1,9 @@
+{
+  "appName": "Valquíria Chat",
+  "theme": "dark",
+  "port": 4000,
+  "openRegistration": true,
+  "allowUploads": true,
+  "maxUploadSizeMb": 15,
+  "announcement": null
+}

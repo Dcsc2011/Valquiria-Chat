@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+*.log
+uploads/images/*
+uploads/documents/*
+uploads/audio/*
+uploads/avatars/*
+uploads/banners/*
+uploads/group-avatars/*
+!uploads/**/.gitkeep
+database/backups/*
+!database/backups/.gitkeep

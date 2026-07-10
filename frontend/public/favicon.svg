@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 165 145" width="165" height="145">
+<defs>
+<linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#2563EB"/>
+<stop offset="100%" stop-color="#7C3AED"/>
+</linearGradient>
+</defs>
+<path d="M20 40 C20 15 45 0 80 0 C120 0 145 20 145 55 C145 90 118 112 80 112 C68 112 57 110 47 106 L20 130 L28 100 C22 90 20 75 20 60 Z" fill="url(#wingGrad)"/>
+<path d="M78 20 C95 25 108 15 122 -5 C112 20 118 40 135 48 C112 48 98 62 92 82 C88 60 75 48 58 46 C72 40 78 32 78 20 Z" fill="#F8FAFC" opacity="0.92"/>
+<circle cx="60" cy="60" r="4" fill="#0B0F19"/>
+</svg>

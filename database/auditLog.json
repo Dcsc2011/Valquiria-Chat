@@ -1,0 +1,29 @@
+[
+  {
+    "id": "5101f31f-335f-44d6-8120-d2db78bfb845",
+    "action": "create_code",
+    "details": {
+      "code": "DAMOCLES"
+    },
+    "createdAt": "2026-07-10T07:59:03.458Z"
+  },
+  {
+    "id": "9184e046-d3e9-4fef-a0ce-50f1dc375727",
+    "action": "toggle_owner",
+    "details": {
+      "userId": "8795d3a8-38f3-4f47-b6eb-b24bab85a6eb",
+      "isOwner": true
+    },
+    "createdAt": "2026-07-10T07:59:55.847Z"
+  },
+  {
+    "id": "a5810ba8-cbbd-406d-a8b9-9e60494683e4",
+    "action": "grant_currency",
+    "details": {
+      "userId": "8795d3a8-38f3-4f47-b6eb-b24bab85a6eb",
+      "amount": 50000,
+      "newBalance": 50500
+    },
+    "createdAt": "2026-07-10T08:00:07.522Z"
+  }
+]
