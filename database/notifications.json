@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "9ee4377d-05d9-4089-8860-4c80e105e8d6",
+    "userId": "f5a2966e-3519-49dd-91d4-68a1ab602478",
+    "type": "achievement",
+    "title": "Nova conquista desbloqueada!",
+    "body": "first_message",
+    "data": {
+      "achievementId": "first_message"
+    },
+    "read": false,
+    "createdAt": "2026-07-11T18:48:08.138Z"
+  }
+]

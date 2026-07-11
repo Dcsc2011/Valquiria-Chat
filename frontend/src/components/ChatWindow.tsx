@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Users } from 'lucide-react';
 import Avatar from './Avatar';
 import Logo from './Logo';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import { BadgeList } from './Badge';
+import ProfileViewModal from './ProfileViewModal';
 import { useCatalog } from '../context/CatalogContext';
 import { formatDay, formatLastSeen } from '../utils/format';
 import type { ChatSummary, Message, User } from '../types';
@@ -16,7 +17,7 @@ interface ChatWindowProps {
   isOtherTyping: boolean;
   typingNames?: string[];
   onSendText: (content: string) => void;
-  onSendFile: (payload: { type: 'image' | 'document' | 'audio'; fileUrl: string; fileName: string }) => void;
+  onSendFile: (payload: { type: 'image' | 'document' | 'audio'; fileUrl: string; fileName: string; viewOnce?: boolean }) => void;
   onTyping: () => void;
   onStopTyping: () => void;
   onBack: () => void;
@@ -24,6 +25,7 @@ interface ChatWindowProps {
   onReply: (message: Message) => void;
   onEditMessage: (message: Message) => void;
   onDeleteMessage: (messageId: string) => void;
+  onOpenViewOnce: (messageId: string) => void;
   replyingTo: Message | null;
   onCancelReply: () => void;
   editingMessage: Message | null;
@@ -47,6 +49,7 @@ export default function ChatWindow({
   onReply,
   onEditMessage,
   onDeleteMessage,
+  onOpenViewOnce,
   replyingTo,
   onCancelReply,
   editingMessage,
@@ -56,6 +59,7 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { getEquipped } = useCatalog();
+  const [viewingProfile, setViewingProfile] = useState(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,9 +97,8 @@ export default function ChatWindow({
   return (
     <div className="flex h-full flex-1 flex-col bg-bgChat chat-bg">
       <button
-        onClick={isGroup ? onOpenGroupInfo : undefined}
-        className="flex items-center gap-3 bg-panelHeader px-4 py-2.5 text-left disabled:cursor-default"
-        disabled={!isGroup}
+        onClick={isGroup ? onOpenGroupInfo : () => setViewingProfile(true)}
+        className="flex items-center gap-3 bg-panelHeader px-4 py-2.5 text-left"
       >
         <span onClick={(e) => { e.stopPropagation(); onBack(); }} className="rounded-full p-1.5 hover:bg-panel/60 md:hidden">
           <ArrowLeft className="h-5 w-5 text-textMuted" />
@@ -178,6 +181,7 @@ export default function ChatWindow({
                   onReply={() => onReply(m)}
                   onEdit={() => onEditMessage(m)}
                   onDelete={() => onDeleteMessage(m.id)}
+                  onOpenViewOnce={() => onOpenViewOnce(m.id)}
                 />
               </React.Fragment>
             );
@@ -208,6 +212,10 @@ export default function ChatWindow({
         onSaveEdit={onSaveEdit}
         onCancelEdit={onCancelEdit}
       />
+
+      {viewingProfile && !isGroup && chat.otherUser && (
+        <ProfileViewModal userId={chat.otherUser.id} onClose={() => setViewingProfile(false)} />
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { X, Users, Crown, UserMinus, LogOut, Pencil, Check } from 'lucide-react'
 import { client } from '../api/client';
 import Avatar from './Avatar';
 import { BadgeList } from './Badge';
+import ProfileViewModal from './ProfileViewModal';
 import type { ChatSummary } from '../types';
 
 interface GroupInfoModalProps {
@@ -15,6 +16,7 @@ interface GroupInfoModalProps {
 
 export default function GroupInfoModal({ chat, currentUserId, onClose, onUpdated, onLeft }: GroupInfoModalProps) {
   const [name, setName] = useState(chat.name || '');
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [error, setError] = useState('');
 
@@ -106,15 +108,17 @@ export default function GroupInfoModal({ chat, currentUserId, onClose, onUpdated
             const memberIsAdmin = (chat.admins || []).includes(p.id);
             return (
               <div key={p.id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-panelHeader/60">
-                <Avatar src={p.avatar} name={p.name} size={36} />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1 truncate text-sm text-textPrimary">
-                    {p.name}
-                    <BadgeList badges={p.badges} size={12} />
-                    {memberIsAdmin && <Crown className="h-3.5 w-3.5 text-badgeAdmin" />}
-                  </p>
-                  <p className="truncate text-xs text-textMuted">@{p.username}</p>
-                </div>
+                <button onClick={() => setViewingUserId(p.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                  <Avatar src={p.avatar} name={p.name} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1 truncate text-sm text-textPrimary">
+                      {p.name}
+                      <BadgeList badges={p.badges} size={12} />
+                      {memberIsAdmin && <Crown className="h-3.5 w-3.5 text-badgeAdmin" />}
+                    </p>
+                    <p className="truncate text-xs text-textMuted">@{p.username}</p>
+                  </div>
+                </button>
                 {isAdmin && p.id !== currentUserId && (
                   <div className="flex items-center gap-1">
                     <button
@@ -145,6 +149,8 @@ export default function GroupInfoModal({ chat, currentUserId, onClose, onUpdated
           <LogOut className="h-4 w-4" /> Sair do grupo
         </button>
       </div>
+
+      {viewingUserId && <ProfileViewModal userId={viewingUserId} onClose={() => setViewingUserId(null)} />}
     </div>
   );
 }

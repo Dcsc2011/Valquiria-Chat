@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Configurar servidor</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: #111b21;
+        color: #e9edef;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 15px;
+        margin: 0 0 6px;
+      }
+      p {
+        font-size: 12px;
+        color: #8696a0;
+        margin: 0 0 16px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        background: #202c33;
+        border: 1px solid #2a3942;
+        color: #e9edef;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 14px;
+      }
+      button {
+        width: 100%;
+        background: #00a884;
+        color: #111b21;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #008069;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Servidor do Valquíria Chat</h1>
+    <p>Introduz o URL do teu servidor (ex: o domínio do Railway, ou http://localhost:4000).</p>
+    <input id="urlInput" type="text" placeholder="https://o-teu-projecto.up.railway.app" />
+    <button id="saveBtn">Guardar e reiniciar ligação</button>
+
+    <script>
+      const input = document.getElementById('urlInput');
+      const btn = document.getElementById('saveBtn');
+
+      window.valquiria.getServerUrl().then((url) => {
+        input.value = url || '';
+      });
+
+      btn.addEventListener('click', async () => {
+        const url = input.value.trim();
+        if (!url) return;
+        await window.valquiria.setServerUrl(url);
+        window.close();
+      });
+    </script>
+  </body>
+</html>

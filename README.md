@@ -9,7 +9,10 @@ Rede social / mensageiro estilo WhatsApp + Discord + Telegram, com loja premium 
 - Texto, emoji, imagem, documento e áudio
 - Responder a mensagens (reply/quote), editar e apagar mensagens próprias
 - Reacções rápidas com emoji (estilo Discord/Telegram)
+- **Mensagens de visualização única** (estilo WhatsApp): imagens/áudios que só podem ser abertos uma vez por cada destinatário; depois de abertos mostram "já visualizada"
 - Indicador "a escrever...", confirmações de entrega e leitura
+- **Notificações do sistema operativo** (como o WhatsApp Web): quando a aba não está em foco, uma mensagem nova mostra uma notificação nativa do browser/SO com som — mesmo com a app minimizada
+- **Ver perfil de outros utilizadores**: clica no cabeçalho de uma conversa directa, num membro de grupo, ou num resultado de pesquisa
 
 **Loja Premium (cosméticos)**
 - 11 bundles temáticos: Royal, Ragnarok, Valhalla, Aurora, Galaxy, Shadow, Dragon, Cyber, Celestial, Bifrost, Kraken
@@ -58,6 +61,11 @@ Rede social / mensageiro estilo WhatsApp + Discord + Telegram, com loja premium 
 
 **Backend:** Node.js, Express, Socket.IO, JWT, bcrypt, Helmet, CORS, dotenv, Multer
 **Frontend:** React + Vite, TypeScript, TailwindCSS, Lucide Icons
+
+## App para telemóvel e ambiente de trabalho
+
+- **iPhone/Android**: a app é uma PWA instalável. Abre o site no telemóvel e usa "Adicionar ao ecrã principal" (a app mostra automaticamente esse aviso). Funciona como uma app normal, com ícone próprio.
+- **Windows/Mac/Linux (.exe/.dmg/.AppImage)**: a pasta `/electron` tem um wrapper de ambiente de trabalho completo. Vê `electron/README.md` para gerar o instalador — precisa de correr no teu PC (não é possível compilar um `.exe` a partir desta conversa).
 
 ## Estrutura
 
@@ -188,5 +196,6 @@ O prompt original pedia um sistema à escala do Discord Nitro/Steam Market (150+
 - **Moeda virtual apenas** ("Runas") — não há integração de pagamentos reais (Stripe/PayPal), o que evitaria complexidade legal/fiscal fora do âmbito de um projecto pessoal.
 - Wishlist, presentes entre utilizadores e sistema de tickets de suporte **não foram incluídos** nesta ronda — o registo de auditoria e o centro de notificações cobrem parte dessa necessidade, mas ficam como próximos passos naturais.
 - Conquistas e níveis usam uma fórmula simples baseada em contagem de mensagens; é fácil de expandir no `backend/src/services/gamification.js`.
+- As **mensagens de visualização única** impedem reabrir pela interface normal depois de vistas, mas — tal como a maioria das implementações caseiras deste tipo de funcionalidade — o ficheiro em si continua acessível através do URL directo em `/uploads`, já que não há encriptação ponta-a-ponta nem streaming único ao nível do servidor. É suficiente para o uso casual pretendido, mas não é uma garantia de segurança absoluta.
 
 Feito para ser simples, rápido e funcional. Sem PostgreSQL, MySQL, MongoDB, Prisma ou Redis — apenas ficheiros JSON.

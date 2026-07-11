@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, CheckCheck, FileText, Download, SmilePlus, Reply, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Check, CheckCheck, FileText, Download, SmilePlus, Reply, MoreVertical, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { formatTime } from '../utils/format';
 import QuickReactionBar from './QuickReactionBar';
 import { BadgeList } from './Badge';
@@ -17,6 +17,7 @@ interface MessageBubbleProps {
   onReply: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onOpenViewOnce: () => void;
 }
 
 function StatusIcon({ status }: { status: Message['status'] }) {
@@ -37,9 +38,11 @@ export default function MessageBubble({
   onReply,
   onEdit,
   onDelete,
+  onOpenViewOnce,
 }: MessageBubbleProps) {
   const [showReactions, setShowReactions] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [revealedLocally, setRevealedLocally] = useState(false);
 
   const reactionEntries = Object.entries(message.reactions || {}).filter(([, users]) => users.length > 0);
 
@@ -76,13 +79,54 @@ export default function MessageBubble({
               </div>
             )}
 
-            {message.type === 'image' && message.fileUrl && (
-              <img src={message.fileUrl} alt="imagem" className="mb-1 max-h-72 rounded-md object-cover" />
-            )}
+            {(() => {
+              const isViewOnceMedia = message.viewOnce && (message.type === 'image' || message.type === 'audio');
+              const alreadyOpened = (message.viewOnceOpenedBy || []).includes(currentUserId);
+              const isRevealed = mine || alreadyOpened || revealedLocally;
 
-            {message.type === 'audio' && message.fileUrl && (
-              <audio controls src={message.fileUrl} className="mb-1 max-w-[240px]" />
-            )}
+              if (isViewOnceMedia && !isRevealed) {
+                return (
+                  <button
+                    onClick={() => {
+                      onOpenViewOnce();
+                      setRevealedLocally(true);
+                    }}
+                    className="mb-1 flex w-48 flex-col items-center gap-1.5 rounded-md bg-black/25 px-3 py-4 text-center"
+                  >
+                    <Eye className="h-6 w-6 text-accent" />
+                    <span className="text-xs font-medium text-textPrimary">Toca para ver</span>
+                    <span className="text-[10px] text-textMuted">Visualização única</span>
+                  </button>
+                );
+              }
+
+              if (isViewOnceMedia && !mine && alreadyOpened && !revealedLocally) {
+                return (
+                  <div className="mb-1 flex w-48 flex-col items-center gap-1.5 rounded-md bg-black/10 px-3 py-4 text-center opacity-60">
+                    <EyeOff className="h-6 w-6 text-textMuted" />
+                    <span className="text-xs text-textMuted">Já visualizada</span>
+                  </div>
+                );
+              }
+
+              return (
+                <>
+                  {message.type === 'image' && message.fileUrl && (
+                    <div className="relative mb-1">
+                      <img src={message.fileUrl} alt="imagem" className="max-h-72 rounded-md object-cover" />
+                      {isViewOnceMedia && (
+                        <span className="absolute right-1.5 top-1.5 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
+                          <Eye className="h-3 w-3" /> Única
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {message.type === 'audio' && message.fileUrl && (
+                    <audio controls src={message.fileUrl} className="mb-1 max-w-[240px]" />
+                  )}
+                </>
+              );
+            })()}
 
             {message.type === 'document' && message.fileUrl && (
               <a

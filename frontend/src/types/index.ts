@@ -104,6 +104,8 @@ export interface Message {
   edited: boolean;
   editedAt: string | null;
   deleted: boolean;
+  viewOnce: boolean;
+  viewOnceOpenedBy: string[];
   createdAt: string;
   status: MessageStatus;
   readBy: string[];

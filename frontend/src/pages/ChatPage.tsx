@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { client } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../hooks/useSocket';
+import { useBrowserNotifications } from '../hooks/useBrowserNotifications';
 import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import GroupInfoModal from '../components/GroupInfoModal';
@@ -10,6 +11,7 @@ import type { ChatSummary, Message, User } from '../types';
 export default function ChatPage() {
   const { user, setUser } = useAuth();
   const socket = useSocket();
+  const { notify } = useBrowserNotifications();
 
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<ChatSummary | null>(null);
@@ -19,6 +21,11 @@ export default function ChatPage() {
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
+
+  const chatsRef = useRef<ChatSummary[]>([]);
+  useEffect(() => {
+    chatsRef.current = chats;
+  }, [chats]);
 
   const loadChats = useCallback(async () => {
     const res = await client.get('/chats');
@@ -92,6 +99,24 @@ export default function ChatPage() {
       });
 
       setMessages((prev) => (activeChat?.id === message.chatId ? [...prev, message] : prev));
+
+      if (message.senderId !== user?.id) {
+        const chat = chatsRef.current.find((c) => c.id === message.chatId);
+        const senderName =
+          chat?.type === 'group'
+            ? chat.participants?.find((p) => p.id === message.senderId)?.name || 'Alguém'
+            : chat?.otherUser?.name || 'Nova mensagem';
+        const chatLabel = chat?.type === 'group' ? `${chat.name} · ${senderName}` : senderName;
+        const preview =
+          message.type === 'text' || message.type === 'emoji'
+            ? message.content
+            : message.type === 'image'
+            ? '📷 Imagem'
+            : message.type === 'audio'
+            ? '🎤 Áudio'
+            : '📄 Documento';
+        notify(chatLabel, { body: preview });
+      }
     };
 
     const handleMessageStatus = ({ messageId, status }: { messageId: string; status: Message['status'] }) => {
@@ -117,6 +142,10 @@ export default function ChatPage() {
 
     const handleDeleted = ({ messageId }: { messageId: string }) => {
       setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, deleted: true, content: '' } : m)));
+    };
+
+    const handleViewOnceOpened = ({ messageId, viewOnceOpenedBy }: { messageId: string; viewOnceOpenedBy: string[] }) => {
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, viewOnceOpenedBy } : m)));
     };
 
     const handleTyping = ({ chatId }: { chatId: string }) => {
@@ -174,6 +203,7 @@ export default function ChatPage() {
     socket.on('messageReaction', handleReaction);
     socket.on('messageEdited', handleEdited);
     socket.on('messageDeleted', handleDeleted);
+    socket.on('messageViewOnceOpened', handleViewOnceOpened);
     socket.on('typing', handleTyping);
     socket.on('stopTyping', handleStopTyping);
     socket.on('userOnline', handleUserOnline);
@@ -187,13 +217,14 @@ export default function ChatPage() {
       socket.off('messageReaction', handleReaction);
       socket.off('messageEdited', handleEdited);
       socket.off('messageDeleted', handleDeleted);
+      socket.off('messageViewOnceOpened', handleViewOnceOpened);
       socket.off('typing', handleTyping);
       socket.off('stopTyping', handleStopTyping);
       socket.off('userOnline', handleUserOnline);
       socket.off('userOffline', handleUserOffline);
       socket.off('userStatusChanged', handleStatusChanged);
     };
-  }, [socket, activeChat, user, setUser]);
+  }, [socket, activeChat, user, setUser, notify]);
 
   const sendText = useCallback(
     (content: string) => {
@@ -210,7 +241,7 @@ export default function ChatPage() {
   );
 
   const sendFile = useCallback(
-    (payload: { type: 'image' | 'document' | 'audio'; fileUrl: string; fileName: string }) => {
+    (payload: { type: 'image' | 'document' | 'audio'; fileUrl: string; fileName: string; viewOnce?: boolean }) => {
       if (!socket || !activeChat) return;
       socket.emit('message', {
         chatId: activeChat.id,
@@ -219,6 +250,7 @@ export default function ChatPage() {
         fileName: payload.fileName,
         content: '',
         replyTo: replyingTo?.id || null,
+        viewOnce: payload.viewOnce || false,
       });
       setReplyingTo(null);
     },
@@ -271,6 +303,14 @@ export default function ChatPage() {
     [socket, activeChat]
   );
 
+  const handleOpenViewOnce = useCallback(
+    (messageId: string) => {
+      if (!socket || !activeChat) return;
+      socket.emit('openViewOnce', { chatId: activeChat.id, messageId });
+    },
+    [socket, activeChat]
+  );
+
   const isOtherTyping = useMemo(
     () => (activeChat ? typingChatIds.has(activeChat.id) : false),
     [activeChat, typingChatIds]
@@ -305,6 +345,7 @@ export default function ChatPage() {
           onReply={handleReply}
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
+          onOpenViewOnce={handleOpenViewOnce}
           replyingTo={replyingTo}
           onCancelReply={() => setReplyingTo(null)}
           editingMessage={editingMessage}

@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Smile, Paperclip, Send, Mic, X, Pencil } from 'lucide-react';
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import { Smile, Paperclip, Send, Mic, X, Pencil, Eye, EyeOff } from 'lucide-react';
+import EmojiPicker, { EmojiClickData, Theme, EmojiStyle } from 'emoji-picker-react';
 import { client } from '../api/client';
 import type { Message } from '../types';
 
 interface MessageInputProps {
   onSendText: (content: string) => void;
-  onSendFile: (payload: { type: 'image' | 'document' | 'audio'; fileUrl: string; fileName: string }) => void;
+  onSendFile: (payload: { type: 'image' | 'document' | 'audio'; fileUrl: string; fileName: string; viewOnce?: boolean }) => void;
   onTyping: () => void;
   onStopTyping: () => void;
   replyingTo?: Message | null;
@@ -32,6 +32,7 @@ export default function MessageInput({
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [viewOnceMode, setViewOnceMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -89,7 +90,9 @@ export default function MessageInput({
         type: isImage ? 'image' : isAudio ? 'audio' : 'document',
         fileUrl: res.data.url,
         fileName: res.data.fileName,
+        viewOnce: viewOnceMode && (isImage || isAudio),
       });
+      setViewOnceMode(false);
     } catch (err) {
       console.error(err);
     } finally {
@@ -131,6 +134,16 @@ export default function MessageInput({
         </div>
       )}
 
+      {viewOnceMode && (
+        <div className="mb-2 flex items-center gap-2 rounded-lg bg-accent/15 px-3 py-2 text-xs text-accent">
+          <Eye className="h-3.5 w-3.5" />
+          Modo visualização única activo — a próxima imagem ou áudio só poderá ser visto uma vez.
+          <button onClick={() => setViewOnceMode(false)} className="ml-auto">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {showEmoji && (
         <div className="absolute bottom-16 left-2 z-30">
           <div className="mb-1 flex justify-end">
@@ -141,7 +154,15 @@ export default function MessageInput({
               <X className="h-4 w-4" />
             </button>
           </div>
-          <EmojiPicker onEmojiClick={handleEmojiClick} theme={'dark' as any} />
+          <EmojiPicker
+            onEmojiClick={handleEmojiClick}
+            theme={Theme.DARK}
+            emojiStyle={EmojiStyle.NATIVE}
+            width={320}
+            height={380}
+            searchPlaceholder="Pesquisar emoji"
+            previewConfig={{ showPreview: false }}
+          />
         </div>
       )}
 
@@ -155,19 +176,28 @@ export default function MessageInput({
         </button>
 
         {!editingMessage && (
-          <label
-            className="cursor-pointer rounded-full p-2 text-textMuted hover:bg-panelHeader hover:text-textPrimary"
-            title="Anexar"
-          >
-            <Paperclip className="h-5 w-5" />
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleFileChange}
-              accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
-            />
-          </label>
+          <>
+            <button
+              onClick={() => setViewOnceMode((v) => !v)}
+              title="Enviar próxima imagem/áudio como visualização única"
+              className={`rounded-full p-2 hover:bg-panelHeader ${viewOnceMode ? 'text-accent' : 'text-textMuted hover:text-textPrimary'}`}
+            >
+              {viewOnceMode ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+            </button>
+            <label
+              className="cursor-pointer rounded-full p-2 text-textMuted hover:bg-panelHeader hover:text-textPrimary"
+              title="Anexar"
+            >
+              <Paperclip className="h-5 w-5" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+                accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
+              />
+            </label>
+          </>
         )}
 
         <textarea

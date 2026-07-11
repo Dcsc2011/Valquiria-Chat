@@ -7,6 +7,7 @@ const {
   toggleReaction,
   editMessage,
   deleteMessage,
+  openViewOnce,
 } = require('../services/messageService');
 const { registerMessageActivity } = require('../services/gamification');
 const { pushNotification } = require('../services/notificationService');
@@ -74,7 +75,7 @@ function registerSocketHandlers(io) {
 
     socket.on('message', async (payload, ack) => {
       try {
-        const { chatId, type, content, fileUrl, fileName, replyTo, mentions } = payload || {};
+        const { chatId, type, content, fileUrl, fileName, replyTo, mentions, viewOnce } = payload || {};
         const { message, chat } = await createMessage({
           chatId,
           senderId: userId,
@@ -84,6 +85,7 @@ function registerSocketHandlers(io) {
           fileName,
           replyTo,
           mentions,
+          viewOnce,
         });
 
         emitToChatParticipants(io, chat, 'message', { message });
@@ -230,6 +232,23 @@ function registerSocketHandlers(io) {
         emitToChatParticipants(io, chat, 'messageDeleted', { messageId });
       } catch (err) {
         socket.emit('errorEvent', { error: err.message });
+      }
+    });
+
+    socket.on('openViewOnce', async ({ chatId, messageId }, ack) => {
+      try {
+        if (!chatId || !messageId) return;
+        const chats = getChats();
+        const chat = chats.find((c) => c.id === chatId && c.participants.includes(userId));
+        if (!chat) return;
+        const message = await openViewOnce(messageId, userId);
+        emitToChatParticipants(io, chat, 'messageViewOnceOpened', {
+          messageId: message.id,
+          viewOnceOpenedBy: message.viewOnceOpenedBy,
+        });
+        if (typeof ack === 'function') ack({ success: true, message });
+      } catch (err) {
+        if (typeof ack === 'function') ack({ success: false, error: err.message });
       }
     });
 

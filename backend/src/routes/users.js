@@ -27,7 +27,13 @@ router.get('/:id', authRequired, (req, res) => {
   const users = getUsers();
   const user = users.find((u) => u.id === req.params.id);
   if (!user) return res.status(404).json({ error: 'Utilizador não encontrado.' });
-  res.json({ user: toPublicUser(user) });
+
+  const publicUser = toPublicUser(user);
+  if (user.id !== req.user.id && user.privacy?.showOnlineStatus === false) {
+    publicUser.isOnline = false;
+    publicUser.lastSeen = user.lastSeen; // mantém a data de criação/última actividade real oculta seria excessivo; ocultamos apenas o estado ao vivo
+  }
+  res.json({ user: publicUser });
 });
 
 router.put('/me', authRequired, async (req, res) => {

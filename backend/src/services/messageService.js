@@ -5,7 +5,7 @@ const { sanitizeText } = require('../utils/sanitize');
 const ALLOWED_TYPES = ['text', 'emoji', 'image', 'document', 'audio'];
 const MAX_REACTION_LENGTH = 8; // um emoji cabe confortavelmente aqui
 
-async function createMessage({ chatId, senderId, type, content, fileUrl, fileName, replyTo, mentions }) {
+async function createMessage({ chatId, senderId, type, content, fileUrl, fileName, replyTo, mentions, viewOnce }) {
   if (!ALLOWED_TYPES.includes(type)) {
     throw new Error('Tipo de mensagem inválido.');
   }
@@ -26,6 +26,9 @@ async function createMessage({ chatId, senderId, type, content, fileUrl, fileNam
     ? mentions.filter((id) => chat.participants.includes(id))
     : [];
 
+  // Visualização única só faz sentido para imagens e áudios (conteúdo visual/sensível).
+  const isViewOnceEligible = type === 'image' || type === 'audio';
+
   const message = {
     id: uuidv4(),
     chatId,
@@ -40,6 +43,8 @@ async function createMessage({ chatId, senderId, type, content, fileUrl, fileNam
     edited: false,
     editedAt: null,
     deleted: false,
+    viewOnce: isViewOnceEligible ? !!viewOnce : false,
+    viewOnceOpenedBy: [],
     createdAt: new Date().toISOString(),
     status: 'sent',
     readBy: [],
@@ -138,6 +143,27 @@ async function deleteMessage(messageId, userId, isGroupAdmin) {
   return message;
 }
 
+// Marca uma mensagem de visualização única como vista por este utilizador.
+// O remetente nunca é bloqueado (é o dono do conteúdo); cada outro destinatário só pode "abrir" uma vez.
+async function openViewOnce(messageId, userId) {
+  const messages = getMessages();
+  const message = messages.find((m) => m.id === messageId);
+  if (!message) throw new Error('Mensagem não encontrada.');
+  if (!message.viewOnce) throw new Error('Esta mensagem não é de visualização única.');
+  if (message.deleted) throw new Error('Esta mensagem foi apagada.');
+
+  if (message.senderId === userId) {
+    return message; // o remetente pode sempre rever a própria mensagem
+  }
+
+  if (!(message.viewOnceOpenedBy || []).includes(userId)) {
+    message.viewOnceOpenedBy = [...(message.viewOnceOpenedBy || []), userId];
+    await saveMessages(messages);
+  }
+
+  return message;
+}
+
 module.exports = {
   createMessage,
   markDelivered,
@@ -145,5 +171,6 @@ module.exports = {
   toggleReaction,
   editMessage,
   deleteMessage,
+  openViewOnce,
   ALLOWED_TYPES,
 };

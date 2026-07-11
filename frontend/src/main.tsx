@@ -20,3 +20,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Regista o service worker apenas em produção (build), para tornar a app instalável
+// como PWA no Android/desktop. Em desenvolvimento isto atrapalharia o hot-reload do Vite.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Falha silenciosa — a app continua a funcionar normalmente sem o service worker.
+    });
+  });
+}
