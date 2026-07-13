@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, Lock, LockOpen } from 'lucide-react';
 import Avatar from './Avatar';
 import Logo from './Logo';
 import MessageBubble from './MessageBubble';
@@ -126,6 +126,15 @@ export default function ChatWindow({
           <p className="flex items-center gap-1 truncate text-sm font-medium text-textPrimary">
             {headerName}
             {!isGroup && chat.otherUser && <BadgeList badges={chat.otherUser.badges} />}
+            {chat.myEncryptedKey ? (
+              <span title="Mensagens encriptadas ponta-a-ponta">
+                <Lock className="h-3 w-3 shrink-0 text-accent" />
+              </span>
+            ) : (
+              <span title="Ainda sem encriptação ponta-a-ponta">
+                <LockOpen className="h-3 w-3 shrink-0 text-textMuted" />
+              </span>
+            )}
           </p>
           <p className="truncate text-xs text-textMuted">
             {isOtherTyping ? (
@@ -151,14 +160,16 @@ export default function ChatWindow({
       </button>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 md:px-10">
-        <div className="mx-auto flex max-w-3xl flex-col gap-1.5">
+        <div className="mx-auto flex max-w-3xl flex-col">
           {messages.map((m, idx) => {
             const day = formatDay(m.createdAt);
             const showDaySeparator = day !== lastDay;
             lastDay = day;
             const prev = messages[idx - 1];
             const sender = getSender(m.senderId);
-            const showSenderName = isGroup && m.senderId !== currentUser.id && (!prev || prev.senderId !== m.senderId);
+            const withinGroupWindow =
+              !!prev && prev.senderId === m.senderId && new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60 * 1000;
+            const showHeader = showDaySeparator || !withinGroupWindow;
             const quotedMessage = findMessage(m.replyTo);
             const quotedSender = quotedMessage ? getSender(quotedMessage.senderId) : undefined;
 
@@ -174,7 +185,7 @@ export default function ChatWindow({
                   mine={m.senderId === currentUser.id}
                   currentUserId={currentUser.id}
                   sender={sender}
-                  showSenderName={showSenderName}
+                  showHeader={showHeader}
                   quotedMessage={quotedMessage}
                   quotedSenderName={quotedSender?.name}
                   onReact={(emoji) => onReact(m.id, emoji)}

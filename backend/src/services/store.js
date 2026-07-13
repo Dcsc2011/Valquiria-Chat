@@ -8,7 +8,7 @@ const DEFAULTS = {
   sessions: [],
   config: {
     appName: 'Valquíria Chat',
-    theme: 'dark',
+    theme: 'valquiria',
     port: process.env.PORT || 4000,
     openRegistration: true,
     allowUploads: true,

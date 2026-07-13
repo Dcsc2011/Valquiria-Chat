@@ -5,7 +5,7 @@
 // common/rare = estático · epic = glow · legendary = shimmer + glow forte ·
 // mythic = anel giratório + shimmer + glow máximo.
 
-const CATEGORIES = ['banner', 'frame', 'aura', 'badge', 'background', 'emoji', 'cursor'];
+const CATEGORIES = ['banner', 'frame', 'aura', 'badge', 'background', 'emoji', 'cursor', 'profileEffect'];
 const RARITIES = ['common', 'rare', 'epic', 'legendary', 'mythic'];
 
 const BUNDLES = [
@@ -152,6 +152,18 @@ const ITEMS = [
     preview: { boxShadow: '0 0 36px 12px #ffffffcc', ringGradient: 'conic-gradient(from 0deg, #ffffff, #d4af37, #7C3AED, #ffffff)', spinDuration: '2s' } },
   { id: 'banner_owner', type: 'banner', bundleId: null, name: 'Bandeira do Dono', rarity: 'mythic', price: null, ownerOnly: true,
     preview: { background: 'linear-gradient(120deg, #000000, #d4af37, #7C3AED, #000000)', shimmer: true } },
+
+  // ---------- Efeitos de perfil (partículas animadas ao abrir o perfil) ----------
+  { id: 'effect_sparkles', type: 'profileEffect', bundleId: null, name: 'Faíscas Douradas', rarity: 'epic', price: 450,
+    preview: { emoji: '✨', color: '#d4af37' } },
+  { id: 'effect_embers', type: 'profileEffect', bundleId: null, name: 'Cinzas de Ragnarok', rarity: 'legendary', price: 700,
+    preview: { emoji: '🔥', color: '#f97316' } },
+  { id: 'effect_snow', type: 'profileEffect', bundleId: null, name: 'Neve de Valhalla', rarity: 'rare', price: 300,
+    preview: { emoji: '❄️', color: '#93c5fd' } },
+  { id: 'effect_petals', type: 'profileEffect', bundleId: null, name: 'Pétalas Nórdicas', rarity: 'rare', price: 300,
+    preview: { emoji: '🌸', color: '#f472b6' } },
+  { id: 'effect_stars', type: 'profileEffect', bundleId: null, name: 'Poeira de Estrelas', rarity: 'legendary', price: 700,
+    preview: { emoji: '🌟', color: '#60a5fa' } },
 ];
 
 function buildDefaultCatalog() {

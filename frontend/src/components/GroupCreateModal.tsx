@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { X, Search, Users, Check } from 'lucide-react';
 import { client } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { useCrypto } from '../context/CryptoContext';
 import Avatar from './Avatar';
 import type { ChatSummary, User } from '../types';
 
@@ -10,6 +12,8 @@ interface GroupCreateModalProps {
 }
 
 export default function GroupCreateModal({ onClose, onCreated }: GroupCreateModalProps) {
+  const { user: currentUser } = useAuth();
+  const crypto = useCrypto();
   const [name, setName] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<User[]>([]);
@@ -51,9 +55,12 @@ export default function GroupCreateModal({ onClose, onCreated }: GroupCreateModa
     }
     setSubmitting(true);
     try {
+      const allParticipants = currentUser ? [...selected, currentUser] : selected;
+      const encryptedKeys = await crypto.buildEncryptedKeysForNewChat(allParticipants);
       const res = await client.post('/chats/group/create', {
         name: name.trim(),
         memberIds: selected.map((u) => u.id),
+        ...(encryptedKeys ? { encryptedKeys } : {}),
       });
       onCreated(res.data.chat);
       onClose();

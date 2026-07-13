@@ -10,5 +10,17 @@
     },
     "read": false,
     "createdAt": "2026-07-11T18:48:08.138Z"
+  },
+  {
+    "id": "ea59d9de-122f-448f-8853-9cbb239acec7",
+    "userId": "9e70c211-718a-4e95-aa28-0860f4aed025",
+    "type": "achievement",
+    "title": "Nova conquista desbloqueada!",
+    "body": "first_message",
+    "data": {
+      "achievementId": "first_message"
+    },
+    "read": false,
+    "createdAt": "2026-07-12T21:27:16.829Z"
   }
 ]

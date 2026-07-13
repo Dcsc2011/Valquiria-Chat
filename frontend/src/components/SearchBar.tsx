@@ -84,7 +84,22 @@ export default function SearchBar({ onStartChat }: SearchBarProps) {
         </div>
       )}
 
-      {viewingUserId && <ProfileViewModal userId={viewingUserId} onClose={() => setViewingUserId(null)} />}
+      {viewingUserId && (
+        <ProfileViewModal
+          userId={viewingUserId}
+          onClose={() => setViewingUserId(null)}
+          onMessage={() => {
+            const found = results.find((u) => u.id === viewingUserId);
+            if (found) {
+              onStartChat(found);
+              setQuery('');
+              setResults([]);
+              setOpen(false);
+            }
+            setViewingUserId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type ThemeName = 'dark' | 'midnight' | 'light';
+export type ThemeName = 'valquiria' | 'discord' | 'midnight' | 'ragnarok' | 'aurora' | 'light';
 
 interface ThemeContextValue {
   theme: ThemeName;
@@ -10,10 +10,11 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'vq_theme';
+const DEFAULT_THEME: ThemeName = 'valquiria';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(
-    (localStorage.getItem(STORAGE_KEY) as ThemeName) || 'dark'
+    (localStorage.getItem(STORAGE_KEY) as ThemeName) || DEFAULT_THEME
   );
 
   useEffect(() => {

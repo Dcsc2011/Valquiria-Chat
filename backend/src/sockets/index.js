@@ -75,7 +75,7 @@ function registerSocketHandlers(io) {
 
     socket.on('message', async (payload, ack) => {
       try {
-        const { chatId, type, content, fileUrl, fileName, replyTo, mentions, viewOnce } = payload || {};
+        const { chatId, type, content, fileUrl, fileName, replyTo, mentions, viewOnce, encrypted, iv } = payload || {};
         const { message, chat } = await createMessage({
           chatId,
           senderId: userId,
@@ -86,6 +86,8 @@ function registerSocketHandlers(io) {
           replyTo,
           mentions,
           viewOnce,
+          encrypted,
+          iv,
         });
 
         emitToChatParticipants(io, chat, 'message', { message });
@@ -126,7 +128,7 @@ function registerSocketHandlers(io) {
             await pushNotification(mentionedId, {
               type: 'mention',
               title: 'Foste mencionado',
-              body: message.content.slice(0, 80),
+              body: message.encrypted ? 'Mensagem encriptada' : message.content.slice(0, 80),
               data: { chatId: chat.id, messageId: message.id },
             });
             io.to(`user:${mentionedId}`).emit('notification', { type: 'mention', chatId: chat.id });
@@ -204,16 +206,17 @@ function registerSocketHandlers(io) {
       }
     });
 
-    socket.on('editMessage', async ({ chatId, messageId, content }) => {
+    socket.on('editMessage', async ({ chatId, messageId, content, iv }) => {
       try {
         if (!chatId || !messageId) return;
         const chats = getChats();
         const chat = chats.find((c) => c.id === chatId && c.participants.includes(userId));
         if (!chat) return;
-        const message = await editMessage(messageId, userId, content);
+        const message = await editMessage(messageId, userId, content, iv);
         emitToChatParticipants(io, chat, 'messageEdited', {
           messageId: message.id,
           content: message.content,
+          iv: message.iv,
           editedAt: message.editedAt,
         });
       } catch (err) {

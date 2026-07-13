@@ -36,6 +36,22 @@ router.get('/:id', authRequired, (req, res) => {
   res.json({ user: publicUser });
 });
 
+// Recebe a chave pública ECDH gerada no dispositivo do utilizador (para criptografia ponta-a-ponta).
+// A chave privada correspondente NUNCA sai do dispositivo — isto é só a metade pública.
+router.put('/me/public-key', authRequired, async (req, res) => {
+  const { publicKey } = req.body || {};
+  if (!publicKey || typeof publicKey !== 'string') {
+    return res.status(400).json({ error: 'Chave pública inválida.' });
+  }
+  const users = getUsers();
+  const user = users.find((u) => u.id === req.user.id);
+  if (!user) return res.status(404).json({ error: 'Utilizador não encontrado.' });
+
+  user.publicKey = publicKey;
+  await saveUsers(users);
+  res.json({ success: true });
+});
+
 router.put('/me', authRequired, async (req, res) => {
   try {
     const { name, username, bio, avatar, banner, customStatus, password, newPassword } = req.body || {};

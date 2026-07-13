@@ -1,6 +1,27 @@
 # Valquíria Chat 🗡️
 
-Rede social / mensageiro estilo WhatsApp + Discord + Telegram, com loja premium de cosméticos, gamificação e um logo original inspirado na Valquíria nórdica.
+Mensageiro com identidade visual estilo Discord, criptografia ponta-a-ponta genuína, loja premium de cosméticos, gamificação e um logo original inspirado na Valquíria nórdica.
+
+## Segurança: Criptografia Ponta-a-Ponta (E2EE)
+
+**Implementação real, não cosmética.** Cada dispositivo gera um par de chaves ECDH (P-256) que nunca sai do browser. Cada conversa tem uma chave AES-256-GCM própria, embrulhada individualmente para cada participante. O servidor:
+- **Nunca** vê o conteúdo das mensagens de texto/emoji em claro — só ciphertext e IVs.
+- Guarda apenas chaves públicas e chaves de conversa já embrulhadas (inúteis sem a chave privada certa).
+- Não consegue, mesmo com acesso total à base de dados, ler o histórico de conversas.
+
+**Limitações honestas desta implementação:**
+- Imagens, áudios e documentos **não são encriptados** nesta versão (ficam como antes, acessíveis por URL). Só texto e emoji são cifrados ponta-a-ponta.
+- A **pesquisa de mensagens no servidor deixou de ser possível** — é uma consequência directa e esperada de E2EE real (se o servidor pudesse pesquisar o conteúdo, não seria E2EE).
+- Se limpares os dados do navegador ou mudares de dispositivo **sem exportar a tua chave** (Perfil → Segurança → Exportar), perdes o acesso ao histórico antigo para sempre — ninguém consegue recuperá-lo, nem o servidor.
+- Conversas criadas antes desta funcionalidade (ou com participantes que ainda não abriram a app actualizada) só ficam encriptadas a partir do momento em que todos os participantes tiverem gerado a sua chave — a app trata isto automaticamente ("migração preguiçosa").
+
+## Estilo Discord
+
+- Lista de mensagens plana (sem balões), avatar + nome só na primeira mensagem de cada sequência do mesmo remetente
+- Barra de acções flutuante ao passar o rato (reagir, responder, editar, apagar)
+- **Página de perfil estilo Discord**: banner, avatar sobreposto com moldura/auréola, insígnias, "Sobre mim", nível
+- **Efeitos de perfil**: partículas animadas (faíscas, cinzas, neve, pétalas, estrelas) que aparecem ao abrir o perfil de alguém com esse cosmético equipado — mais um efeito subtil de entrada em todos os perfis
+- **Bandeiras com efeito de brilho** (sweep) a percorrer o banner do perfil
 
 ## Funcionalidades
 
@@ -37,8 +58,11 @@ Rede social / mensageiro estilo WhatsApp + Discord + Telegram, com loja premium 
 - Pesquisa global (utilizadores, grupos, mensagens nas tuas conversas)
 
 **Temas**
-- Escuro (clássico, estilo WhatsApp)
-- Midnight — identidade visual premium Valquíria (azul/roxo nórdico)
+- **Valquíria** (padrão) — dourado, preto e roxo, cores do logo
+- Discord — inspirado no Discord Dark clássico (blurple)
+- Midnight — azul/roxo nórdico
+- Ragnarok — fogo e cinzas
+- Aurora — verde e azul boreal
 - Claro
 
 **Painel do Dono** (`/owner`, dentro da própria conta — não precisa do login separado de admin)

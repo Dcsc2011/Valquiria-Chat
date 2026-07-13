@@ -1,6 +1,6 @@
 export type StatusMode = 'online' | 'away' | 'busy' | 'invisible';
 export type Badge = 'verified' | 'developer' | 'founder' | 'early_supporter' | 'translator';
-export type CosmeticCategory = 'banner' | 'frame' | 'aura' | 'badge' | 'background' | 'emoji' | 'cursor';
+export type CosmeticCategory = 'banner' | 'frame' | 'aura' | 'badge' | 'background' | 'emoji' | 'cursor' | 'profileEffect';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
 
 export interface CosmeticPreview {
@@ -85,6 +85,7 @@ export interface User {
   level: number;
   achievements: string[];
   privacy: PrivacySettings;
+  publicKey: string | null;
 }
 
 export type MessageType = 'text' | 'emoji' | 'image' | 'document' | 'audio';
@@ -96,6 +97,8 @@ export interface Message {
   senderId: string;
   type: MessageType;
   content: string;
+  encrypted: boolean;
+  iv: string | null;
   fileUrl: string | null;
   fileName: string | null;
   replyTo: string | null;
@@ -111,6 +114,12 @@ export interface Message {
   readBy: string[];
 }
 
+export interface WrappedKey {
+  wrappedKey: string;
+  iv: string;
+  wrappedBy: string;
+}
+
 export type ChatType = 'direct' | 'group';
 
 export interface ChatSummary {
@@ -119,6 +128,7 @@ export interface ChatSummary {
   lastMessage: Message | null;
   unreadCount: number;
   updatedAt: string;
+  myEncryptedKey: WrappedKey | null;
   // directo
   otherUser?: User | null;
   // grupo

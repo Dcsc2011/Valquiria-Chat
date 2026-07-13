@@ -5,7 +5,7 @@ const { sanitizeText } = require('../utils/sanitize');
 const ALLOWED_TYPES = ['text', 'emoji', 'image', 'document', 'audio'];
 const MAX_REACTION_LENGTH = 8; // um emoji cabe confortavelmente aqui
 
-async function createMessage({ chatId, senderId, type, content, fileUrl, fileName, replyTo, mentions, viewOnce }) {
+async function createMessage({ chatId, senderId, type, content, fileUrl, fileName, replyTo, mentions, viewOnce, encrypted, iv }) {
   if (!ALLOWED_TYPES.includes(type)) {
     throw new Error('Tipo de mensagem inválido.');
   }
@@ -29,12 +29,28 @@ async function createMessage({ chatId, senderId, type, content, fileUrl, fileNam
   // Visualização única só faz sentido para imagens e áudios (conteúdo visual/sensível).
   const isViewOnceEligible = type === 'image' || type === 'audio';
 
+  // Mensagens de texto/emoji cifradas ponta-a-ponta chegam já como texto cifrado (base64) —
+  // o servidor NUNCA vê o conteúdo em claro. Não aplicamos sanitização/HTML-escaping a
+  // texto cifrado (é ruído binário em base64, não HTML), só limitamos o tamanho por abuso.
+  const isEncryptedText = !!encrypted && (type === 'text' || type === 'emoji');
+
+  let finalContent;
+  if (isEncryptedText) {
+    finalContent = String(content || '').slice(0, 20000);
+  } else if (type === 'text' || type === 'emoji') {
+    finalContent = sanitizeText(content || '', 4000);
+  } else {
+    finalContent = sanitizeText(content || '', 300);
+  }
+
   const message = {
     id: uuidv4(),
     chatId,
     senderId,
     type,
-    content: type === 'text' || type === 'emoji' ? sanitizeText(content || '', 4000) : sanitizeText(content || '', 300),
+    content: finalContent,
+    encrypted: isEncryptedText,
+    iv: isEncryptedText ? String(iv || '').slice(0, 100) : null,
     fileUrl: fileUrl || null,
     fileName: fileName || null,
     replyTo: replyToMessage ? replyToMessage.id : null,
@@ -109,7 +125,7 @@ async function toggleReaction(messageId, userId, emoji) {
   return message;
 }
 
-async function editMessage(messageId, userId, newContent) {
+async function editMessage(messageId, userId, newContent, newIv) {
   const messages = getMessages();
   const message = messages.find((m) => m.id === messageId);
   if (!message) throw new Error('Mensagem não encontrada.');
@@ -119,7 +135,12 @@ async function editMessage(messageId, userId, newContent) {
     throw new Error('Só é possível editar mensagens de texto.');
   }
 
-  message.content = sanitizeText(newContent || '', 4000);
+  if (message.encrypted) {
+    message.content = String(newContent || '').slice(0, 20000);
+    message.iv = String(newIv || '').slice(0, 100);
+  } else {
+    message.content = sanitizeText(newContent || '', 4000);
+  }
   message.edited = true;
   message.editedAt = new Date().toISOString();
   await saveMessages(messages);

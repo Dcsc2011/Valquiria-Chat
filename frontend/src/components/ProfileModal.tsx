@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Camera, Circle, Moon, CircleDashed, EyeOff, Trophy, ShieldQuestion } from 'lucide-react';
+import { X, Camera, Circle, Moon, CircleDashed, EyeOff, Trophy, ShieldQuestion, KeyRound, Download, Upload } from 'lucide-react';
 import { client } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useCatalog } from '../context/CatalogContext';
+import { useCrypto } from '../context/CryptoContext';
 import { useTheme, ThemeName } from '../context/ThemeContext';
 import Avatar from './Avatar';
 import { BadgeList } from './Badge';
@@ -19,16 +20,21 @@ const STATUS_OPTIONS: { mode: StatusMode; label: string; icon: React.ReactNode; 
   { mode: 'invisible', label: 'Invisível', icon: <EyeOff className="h-3.5 w-3.5" />, color: '#8696a0' },
 ];
 
-const THEME_OPTIONS: { id: ThemeName; label: string }[] = [
-  { id: 'dark', label: 'Escuro (clássico)' },
-  { id: 'midnight', label: 'Midnight (Valquíria)' },
-  { id: 'light', label: 'Claro' },
+const THEME_OPTIONS: { id: ThemeName; label: string; swatch: string }[] = [
+  { id: 'valquiria', label: 'Valquíria (dourado)', swatch: '#d4af37' },
+  { id: 'discord', label: 'Discord', swatch: '#5865f2' },
+  { id: 'midnight', label: 'Midnight', swatch: '#2563eb' },
+  { id: 'ragnarok', label: 'Ragnarok', swatch: '#f97316' },
+  { id: 'aurora', label: 'Aurora', swatch: '#2dd4bf' },
+  { id: 'light', label: 'Claro', swatch: '#b8952c' },
 ];
 
 export default function ProfileModal({ onClose }: ProfileModalProps) {
   const { user, setUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const { getEquipped } = useCatalog();
+  const cryptoCtx = useCrypto();
+  const [keyImportMsg, setKeyImportMsg] = useState('');
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
@@ -193,15 +199,16 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
 
             <div>
               <label className="mb-1 block text-xs text-textMuted">Tema</label>
-              <div className="flex flex-col gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5">
                 {THEME_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     onClick={() => setTheme(opt.id)}
-                    className={`rounded-lg px-3 py-2 text-left text-xs ${
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs ${
                       theme === opt.id ? 'bg-accent text-panel font-medium' : 'bg-panel text-textPrimary hover:bg-panelHeader'
                     }`}
                   >
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: opt.swatch }} />
                     {opt.label}
                   </button>
                 ))}
@@ -239,6 +246,45 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
                   <option value="nobody">Ninguém (só conversas existentes)</option>
                 </select>
               </label>
+            </div>
+
+            <div className="rounded-lg bg-panel px-3 py-2">
+              <p className="mb-2 flex items-center gap-1.5 text-xs text-textMuted">
+                <KeyRound className="h-3.5 w-3.5" /> Chave de encriptação ponta-a-ponta
+              </p>
+              <p className="mb-2 text-[11px] leading-relaxed text-textMuted">
+                As tuas mensagens são cifradas neste dispositivo. Se limpares os dados do
+                navegador ou mudares de aparelho sem exportar esta chave, perdes o acesso ao
+                histórico de mensagens antigas para sempre — ninguém, nem o servidor, consegue
+                recuperá-las.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={cryptoCtx.exportIdentityBackup}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-panelHeader py-2 text-xs text-textPrimary hover:bg-panel"
+                >
+                  <Download className="h-3.5 w-3.5" /> Exportar
+                </button>
+                <label className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-panelHeader py-2 text-xs text-textPrimary hover:bg-panel">
+                  <Upload className="h-3.5 w-3.5" /> Importar
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        await cryptoCtx.importIdentityBackup(file);
+                        setKeyImportMsg('Chave importada com sucesso.');
+                      } catch {
+                        setKeyImportMsg('Erro ao importar a chave — verifica o ficheiro.');
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              {keyImportMsg && <p className="mt-2 text-[11px] text-accent">{keyImportMsg}</p>}
             </div>
 
             <details className="rounded-lg bg-panel px-3 py-2">

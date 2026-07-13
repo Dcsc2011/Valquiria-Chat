@@ -1,18 +1,19 @@
 const express = require('express');
-const { getUsers, getChats, getMessages } = require('../services/store');
+const { getUsers, getChats } = require('../services/store');
 const { authRequired } = require('../middleware/auth');
 const { toPublicUser } = require('./auth');
 
 const router = express.Router();
 
-// Pesquisa global: utilizadores, grupos a que pertenço, e mensagens dentro das minhas conversas.
+// Pesquisa global: utilizadores e grupos a que pertenço.
+// Nota: as mensagens de texto são cifradas ponta-a-ponta — o servidor nunca vê o
+// conteúdo em claro, por isso não é (nem pode ser) possível pesquisar dentro de mensagens aqui.
 router.get('/', authRequired, (req, res) => {
   const q = String(req.query.q || '').trim().toLowerCase();
-  if (!q) return res.json({ users: [], groups: [], messages: [] });
+  if (!q) return res.json({ users: [], groups: [], messages: [], messagesSearchDisabled: true });
 
   const users = getUsers();
   const chats = getChats();
-  const messages = getMessages();
 
   const matchedUsers = users
     .filter((u) => u.id !== req.user.id)
@@ -27,15 +28,7 @@ router.get('/', authRequired, (req, res) => {
     .slice(0, 10)
     .map((c) => ({ id: c.id, name: c.name, avatar: c.avatar || null }));
 
-  const myChatIds = new Set(myChats.map((c) => c.id));
-  const matchedMessages = messages
-    .filter((m) => myChatIds.has(m.chatId) && !m.deleted && (m.type === 'text' || m.type === 'emoji'))
-    .filter((m) => m.content.toLowerCase().includes(q))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 20)
-    .map((m) => ({ id: m.id, chatId: m.chatId, content: m.content, createdAt: m.createdAt, senderId: m.senderId }));
-
-  res.json({ users: matchedUsers, groups: matchedGroups, messages: matchedMessages });
+  res.json({ users: matchedUsers, groups: matchedGroups, messages: [], messagesSearchDisabled: true });
 });
 
 module.exports = router;

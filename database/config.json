@@ -1,6 +1,6 @@
 {
   "appName": "Valquíria Chat",
-  "theme": "dark",
+  "theme": "valquiria",
   "port": 4000,
   "openRegistration": true,
   "allowUploads": true,

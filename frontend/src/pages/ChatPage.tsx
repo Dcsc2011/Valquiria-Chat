@@ -3,6 +3,7 @@ import { client } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../hooks/useSocket';
 import { useBrowserNotifications } from '../hooks/useBrowserNotifications';
+import { useCrypto } from '../context/CryptoContext';
 import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import GroupInfoModal from '../components/GroupInfoModal';
@@ -12,10 +13,12 @@ export default function ChatPage() {
   const { user, setUser } = useAuth();
   const socket = useSocket();
   const { notify } = useBrowserNotifications();
+  const crypto = useCrypto();
 
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<ChatSummary | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [plaintextCache, setPlaintextCache] = useState<Record<string, string>>({});
   const [typingChatIds, setTypingChatIds] = useState<Set<string>>(new Set());
   const [showSidebarMobile, setShowSidebarMobile] = useState(true);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -27,6 +30,45 @@ export default function ChatPage() {
     chatsRef.current = chats;
   }, [chats]);
 
+  // Desencripta (no cliente) todas as mensagens de texto/emoji cifradas da conversa activa.
+  // O resultado nunca é reenviado ao servidor — só existe em memória para mostrar na UI.
+  useEffect(() => {
+    if (!activeChat) return;
+    let cancelled = false;
+    (async () => {
+      const toDecrypt = messages.filter(
+        (m) => m.encrypted && (m.type === 'text' || m.type === 'emoji') && plaintextCache[m.id] === undefined
+      );
+      if (toDecrypt.length === 0) return;
+      const entries = await Promise.all(
+        toDecrypt.map(async (m) => [m.id, await crypto.decryptForChat(activeChat, { content: m.content, iv: m.iv })] as const)
+      );
+      if (!cancelled) {
+        setPlaintextCache((prev) => {
+          const next = { ...prev };
+          for (const [id, text] of entries) next[id] = text;
+          return next;
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [messages, activeChat, crypto]);
+
+  const displayMessages = useMemo(
+    () => messages.map((m) => (m.encrypted ? { ...m, content: plaintextCache[m.id] ?? '🔒 A desencriptar...' } : m)),
+    [messages, plaintextCache]
+  );
+
+  const decryptSingle = useCallback(
+    async (chat: ChatSummary, message: Message): Promise<string> => {
+      if (!message.encrypted) return message.content;
+      return crypto.decryptForChat(chat, { content: message.content, iv: message.iv });
+    },
+    [crypto]
+  );
+
   const loadChats = useCallback(async () => {
     const res = await client.get('/chats');
     setChats(res.data.chats);
@@ -36,18 +78,42 @@ export default function ChatPage() {
     loadChats();
   }, [loadChats]);
 
-  const openChat = useCallback(async (chat: ChatSummary) => {
-    setActiveChat(chat);
-    setShowSidebarMobile(false);
-    setReplyingTo(null);
-    setEditingMessage(null);
-    const res = await client.get(`/chats/${chat.id}/messages`);
-    setMessages(res.data.messages);
-  }, []);
+  const openChat = useCallback(
+    async (chat: ChatSummary) => {
+      setActiveChat(chat);
+      setShowSidebarMobile(false);
+      setReplyingTo(null);
+      setEditingMessage(null);
+
+      if (!chat.myEncryptedKey) {
+        const encryptedKeys = await crypto.establishEncryptionIfMissing(chat);
+        if (encryptedKeys) {
+          try {
+            await client.put(`/chats/${chat.id}/keys`, { encryptedKeys });
+            // Recarrega a conversa para obter a própria entrada de chave a partir do servidor.
+            const refreshed = await client.get('/chats');
+            const found = refreshed.data.chats.find((c: ChatSummary) => c.id === chat.id);
+            if (found) {
+              setChats(refreshed.data.chats);
+              setActiveChat(found);
+              chat = found;
+            }
+          } catch {
+            // Outro dispositivo pode ter estabelecido a chave entretanto — não é grave, ignora.
+          }
+        }
+      }
+
+      const res = await client.get(`/chats/${chat.id}/messages`);
+      setMessages(res.data.messages);
+    },
+    [crypto]
+  );
 
   const startChatWithUser = useCallback(
     async (otherUser: User) => {
-      const res = await client.post(`/chats/${otherUser.id}`);
+      const encryptedKeys = user ? await crypto.buildEncryptedKeysForNewChat([otherUser, user]) : null;
+      const res = await client.post(`/chats/${otherUser.id}`, encryptedKeys ? { encryptedKeys } : {});
       const chat: ChatSummary = res.data.chat;
       setChats((prev) => {
         const exists = prev.find((c) => c.id === chat.id);
@@ -55,7 +121,7 @@ export default function ChatPage() {
       });
       openChat(chat);
     },
-    [openChat]
+    [openChat, crypto, user]
   );
 
   const onGroupCreated = useCallback(
@@ -107,15 +173,20 @@ export default function ChatPage() {
             ? chat.participants?.find((p) => p.id === message.senderId)?.name || 'Alguém'
             : chat?.otherUser?.name || 'Nova mensagem';
         const chatLabel = chat?.type === 'group' ? `${chat.name} · ${senderName}` : senderName;
-        const preview =
-          message.type === 'text' || message.type === 'emoji'
-            ? message.content
-            : message.type === 'image'
-            ? '📷 Imagem'
-            : message.type === 'audio'
-            ? '🎤 Áudio'
-            : '📄 Documento';
-        notify(chatLabel, { body: preview });
+
+        (async () => {
+          let preview: string;
+          if (message.type === 'text' || message.type === 'emoji') {
+            preview = chat ? await decryptSingle(chat, message) : message.content;
+          } else if (message.type === 'image') {
+            preview = message.viewOnce ? '👁 Visualização única' : '📷 Imagem';
+          } else if (message.type === 'audio') {
+            preview = message.viewOnce ? '👁 Visualização única' : '🎤 Áudio';
+          } else {
+            preview = '📄 Documento';
+          }
+          notify(chatLabel, { body: preview });
+        })();
       }
     };
 
@@ -134,10 +205,15 @@ export default function ChatPage() {
       setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, reactions } : m)));
     };
 
-    const handleEdited = ({ messageId, content, editedAt }: { messageId: string; content: string; editedAt: string }) => {
+    const handleEdited = ({ messageId, content, iv, editedAt }: { messageId: string; content: string; iv?: string | null; editedAt: string }) => {
       setMessages((prev) =>
-        prev.map((m) => (m.id === messageId ? { ...m, content, edited: true, editedAt } : m))
+        prev.map((m) => (m.id === messageId ? { ...m, content, iv: iv ?? m.iv, edited: true, editedAt } : m))
       );
+      setPlaintextCache((prev) => {
+        const next = { ...prev };
+        delete next[messageId];
+        return next;
+      });
     };
 
     const handleDeleted = ({ messageId }: { messageId: string }) => {
@@ -224,20 +300,23 @@ export default function ChatPage() {
       socket.off('userOffline', handleUserOffline);
       socket.off('userStatusChanged', handleStatusChanged);
     };
-  }, [socket, activeChat, user, setUser, notify]);
+  }, [socket, activeChat, user, setUser, notify, decryptSingle]);
 
   const sendText = useCallback(
-    (content: string) => {
+    async (content: string) => {
       if (!socket || !activeChat) return;
+      const encryptedPayload = await crypto.encryptForChat(activeChat, content);
       socket.emit('message', {
         chatId: activeChat.id,
         type: 'text',
-        content,
+        content: encryptedPayload ? encryptedPayload.content : content,
+        iv: encryptedPayload ? encryptedPayload.iv : null,
+        encrypted: !!encryptedPayload,
         replyTo: replyingTo?.id || null,
       });
       setReplyingTo(null);
     },
-    [socket, activeChat, replyingTo]
+    [socket, activeChat, replyingTo, crypto]
   );
 
   const sendFile = useCallback(
@@ -286,12 +365,18 @@ export default function ChatPage() {
   }, []);
 
   const handleSaveEdit = useCallback(
-    (content: string) => {
+    async (content: string) => {
       if (!socket || !activeChat || !editingMessage) return;
-      socket.emit('editMessage', { chatId: activeChat.id, messageId: editingMessage.id, content });
+      const encryptedPayload = await crypto.encryptForChat(activeChat, content);
+      socket.emit('editMessage', {
+        chatId: activeChat.id,
+        messageId: editingMessage.id,
+        content: encryptedPayload ? encryptedPayload.content : content,
+        iv: encryptedPayload ? encryptedPayload.iv : null,
+      });
       setEditingMessage(null);
     },
-    [socket, activeChat, editingMessage]
+    [socket, activeChat, editingMessage, crypto]
   );
 
   const handleDeleteMessage = useCallback(
@@ -333,7 +418,7 @@ export default function ChatPage() {
       <div className={`${showSidebarMobile ? 'hidden' : 'flex'} h-full w-full md:flex`}>
         <ChatWindow
           chat={activeChat}
-          messages={messages}
+          messages={displayMessages}
           currentUser={user}
           isOtherTyping={isOtherTyping}
           onSendText={sendText}

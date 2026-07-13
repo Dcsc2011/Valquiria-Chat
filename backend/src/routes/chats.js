@@ -24,6 +24,8 @@ function chatWithMeta(chat, userId, users, messages) {
     lastMessage,
     unreadCount,
     updatedAt: chat.updatedAt || chat.createdAt,
+    // Só devolve a entrada de chave encriptada do próprio utilizador — nunca as dos outros.
+    myEncryptedKey: (chat.encryptedKeys && chat.encryptedKeys[userId]) || null,
   };
 
   if (base.type === 'group') {
@@ -85,10 +87,14 @@ router.post('/:userId', authRequired, async (req, res) => {
   let chat = existingChat;
 
   if (!chat) {
+    const { encryptedKeys } = req.body || {};
     chat = {
       id: uuidv4(),
       type: 'direct',
       participants: [req.user.id, otherUserId],
+      // Chave da conversa encriptada individualmente para cada participante (ECDH + AES-GCM),
+      // gerada no cliente. O servidor nunca vê a chave em claro nem o conteúdo das mensagens.
+      encryptedKeys: encryptedKeys && typeof encryptedKeys === 'object' ? encryptedKeys : {},
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -104,7 +110,7 @@ router.post('/:userId', authRequired, async (req, res) => {
 
 // Cria um grupo com um nome e uma lista de membros (o criador é automaticamente admin).
 router.post('/group/create', authRequired, async (req, res) => {
-  const { name, memberIds, avatar } = req.body || {};
+  const { name, memberIds, avatar, encryptedKeys } = req.body || {};
   if (!isNonEmptyString(name, 60)) {
     return res.status(400).json({ error: 'Dá um nome ao grupo.' });
   }
@@ -129,6 +135,7 @@ router.post('/group/create', authRequired, async (req, res) => {
     participants,
     admins: [req.user.id],
     createdBy: req.user.id,
+    encryptedKeys: encryptedKeys && typeof encryptedKeys === 'object' ? encryptedKeys : {},
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -188,10 +195,22 @@ router.post('/:chatId/members', authRequired, async (req, res) => {
     return res.status(403).json({ error: 'Apenas administradores do grupo podem adicionar membros.' });
   }
 
-  const { memberIds } = req.body || {};
+  const { memberIds, newEncryptedKeys } = req.body || {};
   const users = getUsers();
   const validIds = (memberIds || []).filter((id) => users.some((u) => u.id === id) && !chat.participants.includes(id));
   chat.participants = [...new Set([...chat.participants, ...validIds])];
+
+  // O admin que adiciona os novos membros já tem a chave da conversa decifrada no seu
+  // dispositivo, e envia uma cópia dela cifrada individualmente para cada novo membro.
+  if (newEncryptedKeys && typeof newEncryptedKeys === 'object') {
+    chat.encryptedKeys = { ...(chat.encryptedKeys || {}) };
+    for (const memberId of validIds) {
+      if (newEncryptedKeys[memberId]) {
+        chat.encryptedKeys[memberId] = newEncryptedKeys[memberId];
+      }
+    }
+  }
+
   chat.updatedAt = new Date().toISOString();
   await saveChats(chats);
 
@@ -251,6 +270,29 @@ router.post('/:chatId/admins/:userId', authRequired, async (req, res) => {
   }
   await saveChats(chats);
   res.json({ admins: chat.admins });
+});
+
+// Estabelece a encriptação numa conversa antiga que ainda não a tinha (migração "preguiçosa":
+// só acontece quando todos os participantes já têm uma chave pública gerada). Só é aceite
+// se a conversa ainda não tiver nenhuma chave definida, para nunca substituir chaves existentes.
+router.put('/:chatId/keys', authRequired, async (req, res) => {
+  const chats = getChats();
+  const chat = chats.find((c) => c.id === req.params.chatId);
+  if (!chat || !chat.participants.includes(req.user.id)) {
+    return res.status(404).json({ error: 'Conversa não encontrada.' });
+  }
+  if (chat.encryptedKeys && Object.keys(chat.encryptedKeys).length > 0) {
+    return res.status(409).json({ error: 'Esta conversa já tem encriptação estabelecida.' });
+  }
+
+  const { encryptedKeys } = req.body || {};
+  if (!encryptedKeys || typeof encryptedKeys !== 'object') {
+    return res.status(400).json({ error: 'Chaves encriptadas inválidas.' });
+  }
+
+  chat.encryptedKeys = encryptedKeys;
+  await saveChats(chats);
+  res.json({ success: true });
 });
 
 // Lista as mensagens de uma conversa (directa ou de grupo), garantindo que o utilizador pertence a ela.

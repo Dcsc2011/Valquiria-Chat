@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { X, Users, Crown, UserMinus, LogOut, Pencil, Check } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Users, Crown, UserMinus, UserPlus, LogOut, Pencil, Check, Search } from 'lucide-react';
 import { client } from '../api/client';
+import { useCrypto } from '../context/CryptoContext';
 import Avatar from './Avatar';
 import { BadgeList } from './Badge';
 import ProfileViewModal from './ProfileViewModal';
-import type { ChatSummary } from '../types';
+import type { ChatSummary, User } from '../types';
 
 interface GroupInfoModalProps {
   chat: ChatSummary;
@@ -15,12 +16,33 @@ interface GroupInfoModalProps {
 }
 
 export default function GroupInfoModal({ chat, currentUserId, onClose, onUpdated, onLeft }: GroupInfoModalProps) {
+  const crypto = useCrypto();
   const [name, setName] = useState(chat.name || '');
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [error, setError] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<User[]>([]);
 
   const isAdmin = (chat.admins || []).includes(currentUserId);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await client.get('/users/search', { params: { q: query.trim() } });
+        const existingIds = new Set((chat.participants || []).map((p) => p.id));
+        setResults(res.data.users.filter((u: User) => !existingIds.has(u.id)));
+      } catch {
+        setResults([]);
+      }
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [query, chat.participants]);
 
   const saveName = async () => {
     setError('');
@@ -30,6 +52,23 @@ export default function GroupInfoModal({ chat, currentUserId, onClose, onUpdated
       setEditingName(false);
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Erro ao renomear grupo.');
+    }
+  };
+
+  const addMember = async (newMember: User) => {
+    setError('');
+    try {
+      const newEncryptedKeys = await crypto.wrapKeyForNewMembers(chat, [newMember]);
+      const res = await client.post(`/chats/${chat.id}/members`, {
+        memberIds: [newMember.id],
+        ...(newEncryptedKeys ? { newEncryptedKeys } : {}),
+      });
+      onUpdated(res.data.chat);
+      setQuery('');
+      setResults([]);
+      setAddingMember(false);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Erro ao adicionar membro.');
     }
   };
 
@@ -102,7 +141,44 @@ export default function GroupInfoModal({ chat, currentUserId, onClose, onUpdated
 
         {error && <p className="mb-2 text-sm text-red-400">{error}</p>}
 
-        <p className="mb-2 text-xs text-textMuted">{(chat.participants || []).length} membros</p>
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs text-textMuted">{(chat.participants || []).length} membros</p>
+          {isAdmin && (
+            <button
+              onClick={() => setAddingMember((v) => !v)}
+              className="flex items-center gap-1 rounded-md bg-panel px-2 py-1 text-xs text-accent hover:bg-panelHeader"
+            >
+              <UserPlus className="h-3.5 w-3.5" /> Adicionar
+            </button>
+          )}
+        </div>
+
+        {addingMember && (
+          <div className="mb-3">
+            <div className="mb-1 flex items-center gap-2 rounded-lg bg-panel px-3 py-2">
+              <Search className="h-3.5 w-3.5 text-textMuted" />
+              <input
+                className="w-full bg-transparent text-xs text-textPrimary outline-none placeholder:text-textMuted"
+                placeholder="Pesquisar utilizador para adicionar"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {results.map((u) => (
+              <button
+                key={u.id}
+                onClick={() => addMember(u)}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-panelHeader"
+              >
+                <Avatar src={u.avatar} name={u.name} size={28} />
+                <span className="text-xs text-textPrimary">{u.name}</span>
+                <span className="text-xs text-textMuted">@{u.username}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto">
           {(chat.participants || []).map((p) => {
             const memberIsAdmin = (chat.admins || []).includes(p.id);

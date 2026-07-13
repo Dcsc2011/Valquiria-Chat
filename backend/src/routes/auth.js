@@ -78,6 +78,7 @@ router.post('/register', async (req, res) => {
       level: 1,
       achievements: [],
       privacy: { showOnlineStatus: true, showReadReceipts: true, allowMessagesFrom: 'everyone' },
+      publicKey: null, // chave pública ECDH para criptografia ponta-a-ponta (definida pelo cliente após o registo)
     };
 
     users.push(newUser);

@@ -37,7 +37,7 @@ interface CosmeticSwatchProps {
 export function CosmeticSwatch({ item, size = 64 }: CosmeticSwatchProps) {
   const p = item.preview || {};
 
-  if (item.type === 'badge') {
+  if (item.type === 'badge' || item.type === 'profileEffect') {
     return (
       <div
         className="flex items-center justify-center rounded-lg bg-panel text-2xl"

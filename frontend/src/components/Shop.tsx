@@ -20,6 +20,7 @@ const CATEGORY_LABELS: Record<CosmeticCategory | 'all' | 'bundles', string> = {
   background: 'Fundos',
   emoji: 'Emojis',
   cursor: 'Cursores',
+  profileEffect: 'Efeitos de Perfil',
 };
 
 export default function Shop({ onClose }: ShopProps) {

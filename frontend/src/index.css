@@ -2,22 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tema "dark" (padrão, estilo WhatsApp) */
+/* Tema "valquiria" (padrão) — dourado, preto e roxo, cores do logo */
 :root,
-[data-theme='dark'] {
-  --color-panel: #111b21;
-  --color-panel-light: #202c33;
-  --color-panel-header: #2a3942;
-  --color-accent: #00a884;
-  --color-accent-dark: #008069;
-  --color-bubble-out: #005c4b;
-  --color-bubble-in: #202c33;
-  --color-bg-chat: #0b141a;
-  --color-text-muted: #8696a0;
-  --color-text-primary: #e9edef;
+[data-theme='valquiria'] {
+  --color-panel: #0e0b08;
+  --color-panel-light: #17130d;
+  --color-panel-header: #201a10;
+  --color-accent: #d4af37;
+  --color-accent-dark: #b8952c;
+  --color-bubble-out: #2a2110;
+  --color-bubble-in: #17130d;
+  --color-bg-chat: #0a0806;
+  --color-text-muted: #a89a7d;
+  --color-text-primary: #f5efe0;
+  --color-message-hover: rgba(212, 175, 55, 0.06);
+  --color-mention-bg: rgba(212, 175, 55, 0.14);
 }
 
-/* Tema "midnight" — identidade premium Valquíria (azul/roxo nórdico) */
+/* Tema "discord" — inspirado no Discord Dark clássico */
+[data-theme='discord'] {
+  --color-panel: #313338;
+  --color-panel-light: #2b2d31;
+  --color-panel-header: #1e1f22;
+  --color-accent: #5865f2;
+  --color-accent-dark: #4752c4;
+  --color-bubble-out: #383a40;
+  --color-bubble-in: #2b2d31;
+  --color-bg-chat: #313338;
+  --color-text-muted: #949ba4;
+  --color-text-primary: #f2f3f5;
+  --color-message-hover: rgba(4, 4, 5, 0.07);
+  --color-mention-bg: rgba(88, 101, 242, 0.1);
+}
+
+/* Tema "midnight" — azul/roxo nórdico */
 [data-theme='midnight'] {
   --color-panel: #0b0f19;
   --color-panel-light: #131a2b;
@@ -29,20 +47,56 @@
   --color-bg-chat: #080b13;
   --color-text-muted: #8b93b0;
   --color-text-primary: #f8fafc;
+  --color-message-hover: rgba(37, 99, 235, 0.08);
+  --color-mention-bg: rgba(37, 99, 235, 0.14);
+}
+
+/* Tema "ragnarok" — fogo e cinzas */
+[data-theme='ragnarok'] {
+  --color-panel: #1a0f0a;
+  --color-panel-light: #241309;
+  --color-panel-header: #2e1608;
+  --color-accent: #f97316;
+  --color-accent-dark: #ea580c;
+  --color-bubble-out: #3a1a0a;
+  --color-bubble-in: #241309;
+  --color-bg-chat: #150c08;
+  --color-text-muted: #c2a08c;
+  --color-text-primary: #fdf1e7;
+  --color-message-hover: rgba(249, 115, 22, 0.08);
+  --color-mention-bg: rgba(249, 115, 22, 0.16);
+}
+
+/* Tema "aurora" — verde e azul boreal */
+[data-theme='aurora'] {
+  --color-panel: #071a1a;
+  --color-panel-light: #0d2626;
+  --color-panel-header: #113030;
+  --color-accent: #2dd4bf;
+  --color-accent-dark: #14b8a6;
+  --color-bubble-out: #0f3a38;
+  --color-bubble-in: #0d2626;
+  --color-bg-chat: #04100f;
+  --color-text-muted: #8bb5b0;
+  --color-text-primary: #ecfdf9;
+  --color-message-hover: rgba(45, 212, 191, 0.08);
+  --color-mention-bg: rgba(45, 212, 191, 0.14);
 }
 
 /* Tema "light" */
 [data-theme='light'] {
-  --color-panel: #f0f2f5;
-  --color-panel-light: #ffffff;
-  --color-panel-header: #f0f2f5;
-  --color-accent: #00a884;
-  --color-accent-dark: #008069;
-  --color-bubble-out: #d9fdd3;
-  --color-bubble-in: #ffffff;
-  --color-bg-chat: #efeae2;
-  --color-text-muted: #667781;
-  --color-text-primary: #111b21;
+  --color-panel: #ffffff;
+  --color-panel-light: #f2f3f5;
+  --color-panel-header: #e3e5e8;
+  --color-accent: #b8952c;
+  --color-accent-dark: #97781e;
+  --color-bubble-out: #ece5d3;
+  --color-bubble-in: #f2f3f5;
+  --color-bg-chat: #ffffff;
+  --color-text-muted: #5c5e66;
+  --color-text-primary: #1a1a1e;
+  --color-message-hover: rgba(0, 0, 0, 0.03);
+  --color-mention-bg: rgba(184, 149, 44, 0.1);
 }
 
 * {
@@ -112,6 +166,36 @@ body {
 
 .vq-spin-ring {
   animation: spin-slow linear infinite;
+}
+
+/* Efeitos de entrada ao abrir o perfil de alguém (estilo "profile effects" do Discord) */
+@keyframes profile-fade-scale {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.vq-profile-enter {
+  animation: profile-fade-scale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes sparkle-rise {
+  0% { transform: translateY(6px) scale(0.6); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-40px) scale(1.1); opacity: 0; }
+}
+.vq-sparkle {
+  animation: sparkle-rise 1.8s ease-out forwards;
+}
+
+@keyframes banner-sweep {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+.vq-banner-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  animation: banner-sweep 2.8s ease-in-out infinite;
 }
 
 .typing-dot {
